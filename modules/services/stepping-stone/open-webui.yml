@@ -1,0 +1,21 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - WEBUI_AUTH=false
+      - ENABLE_AUTOCOMPLETE_GENERATION=false
+      - ENABLE_FOLLOW_UP_GENERATION=false
+      - ENABLE_TITLE_GENERATION=false
+    volumes:
+      - ${CONF_SSD}/open-webui:/app/data
+    ports:
+      - ${OPEN_WEBUI_PORT}:8080
+
+networks:
+  default:
+    external: true
+    name: ${NETWORK_NAME}

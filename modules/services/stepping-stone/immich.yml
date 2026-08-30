@@ -1,0 +1,77 @@
+name: immich
+
+services:
+    immich-server:
+        image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+        user: "${PUID}:${PGID}"
+        container_name: immich_server
+        restart: unless-stopped
+        environment:
+            DB_DATABASE_NAME: ${DB_DATABASE_IMMICH_NAME}
+            DB_HOSTNAME: immich_postgres
+            DB_USERNAME: ${DB_USERNAME}
+            DB_PASSWORD: ${DB_PASSWORD}
+            REDIS_HOSTNAME: immich_redis
+        volumes:
+            - ${MEDIA_HDD}/immich:/data
+            - /etc/localtime:/etc/localtime:ro
+            - ${MEDIA_HDD}/pictures:/pictures:ro
+        ports:
+            - ${IMMICH_PORT}:2283
+        depends_on:
+            - immich_redis
+            - immich_postgres
+        healthcheck:
+            disable: false
+
+    immich-machine-learning:
+        image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+        user: "${PUID}:${PGID}"
+        container_name: immich_machine_learning
+        restart: always
+        volumes:
+            - ${DATA_HDD}/bulkdata/immich/model-cache:/cache
+        healthcheck:
+            disable: false
+
+    immich_redis:
+        image: docker.io/valkey/valkey:8@sha256:81db6d39e1bba3b3ff32bd3a1b19a6d69690f94a3954ec131277b9a26b95b3aa
+        user: "${PUID}:${PGID}"
+        container_name: immich_redis
+        restart: always
+        healthcheck:
+            test: redis-cli ping || exit 1
+
+    immich_postgres:
+        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+        container_name: immich_postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_DB: ${DB_DATABASE_IMMICH_NAME}
+            POSTGRES_INITDB_ARGS: '--data-checksums'
+            DB_STORAGE_TYPE: 'HDD'
+        volumes:
+            - ${DATABASES_HDD}/immich/data:/var/lib/postgresql/data
+        shm_size: 128mb
+        healthcheck:
+            disable: false
+
+    immich_db_backup:
+        image: prodrigestivill/postgres-backup-local:14
+        user: "${PUID}:${PGID}"
+        container_name: immich_db_backup
+        restart: always
+        environment:
+            - POSTGRES_HOST=immich_postgres
+            - POSTGRES_DB=${DB_DATABASE_IMMICH_NAME}
+            - POSTGRES_CLUSTER=true # Backup all databases inside the instance
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+            - SCHEDULE=@daily       # Runs automatically every day at midnight
+            - BACKUP_KEEP_DAYS=2    # Keeps 2 days of raw dumps locally before auto-deleting
+        volumes:
+            - ${CONF_SSD}/db_backups:/backups # Shared directory across containers
+        depends_on:
+            - immich_postgres

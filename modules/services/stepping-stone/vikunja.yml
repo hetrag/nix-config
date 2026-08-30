@@ -1,0 +1,54 @@
+services:
+    vikunja:
+        image: vikunja/vikunja
+        user: "${PUID}:${PGID}"
+        container_name: vikunja
+        environment:
+            VIKUNJA_SERVICE_PUBLICURL: https://vikunja.jgelectronics.dk/
+            VIKUNJA_DATABASE_HOST: vikunja-db
+            VIKUNJA_DATABASE_PASSWORD: ${DB_PASSWORD}
+            VIKUNJA_DATABASE_TYPE: postgres
+            VIKUNJA_DATABASE_USER: ${DB_USERNAME}
+            VIKUNJA_DATABASE_DATABASE: ${DB_DATABASE_VIKUNJA_NAME}
+            VIKUNJA_SERVICE_SECRET: "${VIKUNJA_SERVICE_SECRET}" # was hardcoded in docker_configs
+        ports:
+            - 3456:3456
+        volumes:
+            -  ${CONF_SSD}/vikunja/files:/app/vikunja/files
+        depends_on:
+            vikunja-db:
+                condition: service_healthy
+        restart: unless-stopped
+
+    vikunja-db:
+        image: postgres:18
+        user: "${PUID}:${PGID}"
+        container_name: vikunja_db
+        environment:
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_DB: ${DB_DATABASE_VIKUNJA_NAME}
+        volumes:
+             - ${DATABASES_HDD}/vikunja/db:/var/lib/postgresql
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER"]
+            interval: 2s
+            start_period: 30s
+
+    vikunja_db_backup:
+        image: prodrigestivill/postgres-backup-local:16
+        container_name: vikunja_db_backup
+        restart: always
+        user: "${PUID}:${PGID}"
+        volumes:
+            - ${CONF_SSD}/db_backups:/backups
+        environment:
+            - POSTGRES_HOST=vikunja-db
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+            - POSTGRES_DB=${DB_DATABASE_VIKUNJA_NAME}
+            - SCHEDULE=@daily
+            - BACKUP_KEEP_DAYS=2
+        depends_on:
+            - vikunja-db

@@ -1,0 +1,21 @@
+# Keys allowed to encrypt/decrypt secrets/secrets.yaml
+#
+# mig (your personal edit key — run once, never commit the private part):
+#   nix-shell -p age -c age-keygen -o ~/.config/sops/age/keys.txt
+#
+# Per machine (as root): convert the SSH host key to an age public key:
+#   ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
+keys:
+  - &mig age1REPLACE_ME_WITH_OUTPUT_OF_AGE_KEYGEN
+  - &laptop age1REPLACE_ME_WITH_OUTPUT_OF_SSH_TO_AGE
+  - &desktop age1REPLACE_ME_WITH_OUTPUT_OF_SSH_TO_AGE
+  - &server age1REPLACE_ME_WITH_OUTPUT_OF_SSH_TO_AGE
+
+creation_rules:
+  - path_regex: ^secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *mig
+          - *laptop
+          - *desktop
+          - *server

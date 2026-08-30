@@ -1,0 +1,23 @@
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    user: "${PUID}:${PGID}"
+    container_name: syncthing
+    hostname: syncthing-node
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${CONF_SSD}/syncthing:/var/syncthing/config
+      - ${DATA_HDD}/obsidian:/var/syncthing/data/obsidian
+    ports:
+      - ${SYNCTHING_GUI_PORT}:8384 # Web GUI
+      - ${SYNCTHING_TCP_PORT}:22000/tcp # TCP listening port
+      - ${SYNCTHING_UDP_PORT}:22000/udp # QUIC listening port
+      - ${SYNCTHING_LOCAL_PORT}:21027/udp # Local discovery
+
+networks:
+  default:
+    external: true
+    name: ${NETWORK_NAME}

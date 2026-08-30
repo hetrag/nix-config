@@ -1,0 +1,46 @@
+services:
+  kopia:
+    image: kopia/kopia:latest
+    container_name: kopia
+    hostname: kopia
+    restart: unless-stopped
+    ports:
+      - "51515:51515"
+    environment:
+      - TZ=${TZ}
+      - KOPIA_PASSWORD=${KOPIA_PASSWORD} # was hardcoded in docker_configs
+      - HOME=/app
+    volumes:
+      # --- KOPIA SYSTEM VOLUMES ---
+      # These hold Kopia's configuration, cache, and logs.
+      # They must be persistent.
+      - ${DATA_HDD}/bulkdata/kopia/tmp:/tmp:shared
+      - ${CONF_SSD}/kopia:/app/config
+      - ${DATA_HDD}/bulkdata/kopia/cache:/app/cache
+      - ${DATA_HDD}/bulkdata/kopia/logs:/app/logs
+      - ${CONF_SSD}/rclone:/app/rclone
+
+      # --- YOUR DATA TO BACK UP ---
+      # Map the local directories you want to back up here.
+      # VERY IMPORTANT: Add ':ro' at the end to make them Read-Only.
+      # This ensures Kopia can only read the data, never accidentally modify it.
+
+      - ${CONF_SSD}:/data/configs:ro
+      - ${MEDIA_HDD}/immich:/data/photos:ro
+      - ${DATA_HDD}/nas:/data/nas:ro
+      - ${MEDIA_HDD}/music:/data/music:ro
+
+    command:
+      - server
+      - start
+      - --disable-csrf-token-checks
+      - --insecure
+      - --address=0.0.0.0:51515
+      - --server-username=admin
+      - --server-password=${KOPIA_PASSWORD}
+      - --without-password
+      - --allow-extremely-dangerous-unauthenticated-server-on-the-network
+
+# NOTE: the --insecure/--without-password/--allow-extremely-dangerous-* flags
+# are the old setup kept for parity; they die with the kopia container when
+# modules/services/kopia.nix takes over (see MIGRATION.md).
