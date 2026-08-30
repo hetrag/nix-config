@@ -8,9 +8,9 @@
     ./hardware-configuration.nix
 
     # ---- Foundation, enabled from day one ----
-    ../../modules/services/caddy.nix
-    ../../modules/services/adguard.nix
-    ../../modules/services/stepping-stone
+    #../../modules/services/caddy.nix
+    #../../modules/services/adguard.nix
+    #../../modules/services/stepping-stone
 
     # ---- Native replacements, enabled one at a time as stacks migrate ----
     # (see MIGRATION.md; uncomment a line when that stack is cut over, in
@@ -54,13 +54,13 @@
   #   zfs set atime=off <pool>   # zfs's equivalent of ext4's noatime (the
   #                              # property wins over mount options)
   fileSystems."/mnt/raid" = lib.mkForce {
-    device = "REPLACE-ME-raid"; # pool/dataset mounted at /mnt/raid
+    device = "raid"; # pool/dataset mounted at /mnt/raid
     fsType = "zfs";
     options = [ "zfsutil" ];
   };
 
   fileSystems."/mnt/ssd" = lib.mkForce {
-    device = "REPLACE-ME-ssd"; # pool/dataset mounted at /mnt/ssd
+    device = "ssd"; # pool/dataset mounted at /mnt/ssd
     fsType = "zfs";
     options = [ "zfsutil" ];
   };
@@ -77,13 +77,13 @@
   # or clients won't see them.
   # anongid=2000 = the media group from modules/core, so NFS clients get
   # group access to anything the services write as group "media".
-  services.nfs.server = {
-    enable = true;
-    exports = ''
-      /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-    '';
-  };
+  #services.nfs.server = {
+  #  enable = true;
+  #  exports = ''
+  #    /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+  #    /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+  #  '';
+  #};
 
   # Day one: same reachability as the old docker setup (everything open to
   # the LAN). Tighten as services migrate — the end state should be caddy
