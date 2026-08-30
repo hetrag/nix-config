@@ -8,7 +8,7 @@ Install is deliberately phased, so only one thing can be wrong at a time:
 
 1. **bare boot** (§2) — no services, no NFS, ssh only. `hosts/server/default.nix`
    ships in this state: every service import is commented out and the pool
-   mounts carry `nofail`.
+   mounts carry `noauto`, which keeps zfs off the boot path.
 2. **zfs** (§3) — import the two data pools and confirm they come back on
    reboot.
 3. **services** (§4) — uncomment caddy, adguard and the stepping-stone stacks.
@@ -189,10 +189,9 @@ The machine comes up bare: ssh, tailscale, and nothing else.
    one, then remove `initialPassword` from `modules/core/default.nix` on the
    next rebuild. Your SSH public key is already deployed by core, so key
    login should work immediately.
-2. `systemctl --failed`. Expect exactly `zfs-import-raid` and
-   `zfs-import-ssd` — the pools aren't imported yet, and `nofail` on the
-   mounts is what kept that from blocking the boot. Anything else is a real
-   problem.
+2. `systemctl --failed` should be empty. The pools aren't imported, but
+   `noauto` on their mounts keeps `zfs-import-raid` / `zfs-import-ssd` off
+   the boot path entirely, so nothing should have run or failed.
 3. If you skipped step 5 above, sops has no key for this host yet
    (`/run/secrets` is empty and `~/.ssh/id_ed25519` is a dangling symlink).
    Fix it now: `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub`, paste into
@@ -208,9 +207,23 @@ Stop here until the machine reboots cleanly twice.
 
 ## 3. Bring up the ZFS pools
 
+Why the mounts carry `noauto` + `nofail`: NixOS generates a
+`zfs-import-<pool>.service` from each zfs entry in `fileSystems`, and pulls
+it into `zfs-import.target` → `zfs.target` → `multi-user.target` **unless
+every filesystem of that pool is `noauto`**. That unit is a `Type=oneshot`
+with no `TimeoutStartSec`, so a pool that can't be imported hangs the boot
+forever — the console shows `A start job is running for Import ZFS pool
+"raid" (… / no limit)`. `nofail` does not help; it only applies to the
+`.mount` unit.
+
+If you are stuck at that message right now: reboot, press `e` at the
+systemd-boot menu and append
+`systemd.mask=zfs-import-raid.service systemd.mask=zfs-import-ssd.service`
+to the kernel line to get in, then rebuild with the `noauto` options.
+
 The pools were last imported by the old server, which had a different
 hostid, so the first import needs `-f`. That stamps them with this host's
-`hostId` — after that, the boot-time import units work unattended.
+`hostId` — after that, imports work unattended.
 
 ```bash
 sudo zpool import           # confirm the names
@@ -225,24 +238,29 @@ under a new name (`sudo zpool import -f oldname raid`) or change `device` in
 `hosts/server/default.nix` — the mount entries, and the systemd import units
 generated from them, are keyed on the pool name.
 
-Then point them at the mountpoints the config expects:
+Then point them at the mountpoints the config expects and mount by hand
+(`noauto` means systemd won't do it for you yet):
 
 ```bash
 sudo zfs set mountpoint=/mnt/raid raid
 sudo zfs set mountpoint=/mnt/ssd  ssd
 sudo zfs set atime=off raid
 sudo zfs set atime=off ssd
+sudo mount /mnt/raid
+sudo mount /mnt/ssd
+ls /mnt/ssd/server_config     # the old data must be there
 ```
 
-Reboot. `/mnt/raid` and `/mnt/ssd` must be mounted with no failed units and
-the old data must be there (`ls /mnt/ssd/server_config`). Only once that
-survives a reboot:
+Reboot and confirm the pools still import (`zpool status` — they should come
+back on their own now that the hostid is stamped). Only then:
 
-- drop `nofail` from both `fileSystems` entries in `hosts/server/default.nix`
-  (from here on, a missing pool *should* stop the boot rather than silently
-  bring services up on an empty directory),
+- drop `noauto` and `nofail` from both `fileSystems` entries in
+  `hosts/server/default.nix`, so the pools mount at boot (from here on a
+  missing pool *should* stop the boot rather than silently bring services
+  up on an empty directory),
 - uncomment the `services.nfs.server` block and port 2049,
-- `nixos-rebuild switch`, then verify the mounts from laptop/desktop.
+- `nixos-rebuild switch`, reboot once more to prove the boot path, then
+  verify the mounts from laptop/desktop.
 
 ## 4. Enable the services
 

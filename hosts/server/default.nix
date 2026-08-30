@@ -61,18 +61,22 @@
   #   zfs set atime=off <pool>   # zfs's equivalent of ext4's noatime (the
   #                              # property wins over mount options)
   #
-  # nofail: until the pools are actually imported, a failed mount must not
-  # keep the machine from booting. Drop it once the pools are settled.
+  # noauto is what keeps boot from hanging while the pools are not set up
+  # yet: the generated zfs-import-<pool>.service is only pulled into
+  # zfs-import.target when *not* every filesystem of that pool is noauto,
+  # and that unit is a Type=oneshot with no start timeout ("no limit").
+  # nofail alone only covers the .mount unit, not the import. Mount by hand
+  # with `mount /mnt/raid`; drop both options once the pools import cleanly.
   fileSystems."/mnt/raid" = lib.mkForce {
     device = "raid"; # pool/dataset mounted at /mnt/raid
     fsType = "zfs";
-    options = [ "zfsutil" "nofail" ];
+    options = [ "zfsutil" "nofail" "noauto" ];
   };
 
   fileSystems."/mnt/ssd" = lib.mkForce {
     device = "ssd"; # pool/dataset mounted at /mnt/ssd
     fsType = "zfs";
-    options = [ "zfsutil" "nofail" ];
+    options = [ "zfsutil" "nofail" "noauto" ];
   };
 
   # Pool maintenance: scrub checks pool integrity (monthly by default, every
