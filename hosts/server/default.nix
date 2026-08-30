@@ -1,6 +1,6 @@
-# Server: headless, and the NAS itself — /raid + /ssd are local disks that
-# this host also exports over NFS to laptop/desktop (core defines the client
-# side of those mounts; here they are forced to be local).
+# Server: headless, and the NAS itself — /raid + /ssd are local zfs pools
+# that this host also exports over NFS to laptop/desktop (core defines the
+# client side of those mounts; here they are forced to be local).
 { lib, ... }:
 
 {
@@ -32,22 +32,49 @@
   networking.hostName = "server";
   networking.useDHCP = true;
 
-  # The NAS disks are local on this host — override core's NFS client mounts.
-  # TODO at install: real /dev/disk/by-id/ paths + correct fsType (see the
-  # note in hardware-configuration.nix about mdadm/zfs arrays).
+  # ZFS for the two NAS pools. This pulls in the zfs kernel module +
+  # userspace and enables the zfs-import@pool / zfs-mount units at boot.
+  # (zfs 2.4 builds fine against linuxPackages_latest in our pinned nixpkgs,
+  # so core's latest kernel is OK on this host.)
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.forceImportRoot = false; # root is ext4; only data pools here
+
+  # REQUIRED by zfs: pools are stamped with the host's id at import and
+  # refuse to import without it. Any unique 8 lowercase hex chars — on the
+  # running server: head -c 8 /etc/machine-id
+  # Set it once and NEVER change it.
+  networking.hostId = "CHANGE-ME";
+
+  # The NAS disks are local zpools on this host — override core's NFS client
+  # mounts. device is the pool (or dataset) name, NOT a /dev/disk path, and
+  # that dataset's mountpoint property must be set to the mount path. Once,
+  # on the server (per pool):
+  #   zpool import <pool>
+  #   zfs set mountpoint=/mnt/raid <pool>
+  #   zfs set atime=off <pool>   # zfs's equivalent of ext4's noatime (the
+  #                              # property wins over mount options)
   fileSystems."/mnt/raid" = lib.mkForce {
-    device = "/dev/disk/by-id/REPLACE-ME-raid";
-    fsType = "ext4";
-    options = [ "defaults" "noatime" ];
+    device = "REPLACE-ME-raid"; # pool/dataset mounted at /mnt/raid
+    fsType = "zfs";
+    options = [ "zfsutil" ];
   };
 
   fileSystems."/mnt/ssd" = lib.mkForce {
-    device = "/dev/disk/by-id/REPLACE-ME-ssd";
-    fsType = "ext4";
-    options = [ "defaults" "noatime" ];
+    device = "REPLACE-ME-ssd"; # pool/dataset mounted at /mnt/ssd
+    fsType = "zfs";
+    options = [ "zfsutil" ];
   };
 
-  # Serve the same paths to laptop/desktop.
+  # Pool maintenance: scrub checks pool integrity (monthly by default, every
+  # imported pool). TRIM is already on by default once zfs is supported.
+  services.zfs.autoScrub.enable = true;
+
+  # Serve the same paths to laptop/desktop. Nothing zfs-specific needed here:
+  # exports reference the mount paths, not the underlying fs. Keep all NFS
+  # config in this block (don't also set the zfs `sharenfs` property on the
+  # pools — pick one mechanism). If you ever create child datasets under
+  # /mnt/raid (each is a separate mount), add `crossmnt` to that export line
+  # or clients won't see them.
   # anongid=2000 = the media group from modules/core, so NFS clients get
   # group access to anything the services write as group "media".
   services.nfs.server = {
