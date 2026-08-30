@@ -8,11 +8,11 @@
 keys:
   - &mig age1mkg249qmqegz4g9mf0z4224tfqyxvnn04p7xuy7wlnrlaqda8auspnrqk7
   - &laptop age176ump6gcp7j8vv9p9msq57lfne2dse4flcgyzws8hzxvc4zh998swur57n
-  # TODO: uncomment once the machine exists (as root:
+  - &server age18f2fjafp2jtjhwk5a5hht934e6hw7397dsgxk6d7fnhexd89vd7qvfus89
+# TODO: uncomment once the machine exists (as root:
   #   ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub), then re-encrypt
   #   (sops updatekeys secrets/secrets.yaml) so it can decrypt:
   # - &desktop age1...
-  # - &server age1...
 
 creation_rules:
   - path_regex: ^secrets/.*\.yaml$
@@ -20,5 +20,5 @@ creation_rules:
       - age:
           - *mig
           - *laptop
-          # - *desktop
-          # - *server
+          - *server
+        # - *desktop
