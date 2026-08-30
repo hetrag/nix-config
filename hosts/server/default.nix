@@ -25,6 +25,10 @@
     # ../../modules/services/kopia.nix
   ];
 
+  # Bootloader (UEFI / systemd-boot default)
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
   networking.hostName = "server";
   networking.useDHCP = true;
 
