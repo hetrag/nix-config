@@ -43,8 +43,10 @@
 
   # ZFS for the two NAS pools. This pulls in the zfs kernel module +
   # userspace and enables the zfs-import@pool / zfs-mount units at boot.
+
   boot.supportedFilesystems.zfs = true;
   boot.zfs.forceImportRoot = false; # root is ext4; only data pools here
+  boot.zfs.extraPools = [ "ssd" "raid"];
 
   # REQUIRED by zfs: pools are stamped with the host's id at import and
   # refuse to import without it. Any unique 8 lowercase hex chars — on the
@@ -56,14 +58,12 @@
   # mounts. device is the pool (or dataset) name, NOT a /dev/disk path, and
   # that dataset's mountpoint property must be set to the mount path. Once,
   # on the server (per pool):
-  zpool import ssd
-  zfs set mountpoint=/mnt/raid ssd
-  zfs set atime=off ssd
-  zpool import raid
-  zfs set mountpoint=/mnt/raid raid
-  zfs set atime=off raid
-  
-  #                              # property wins over mount options)
+  # zpool import ssd
+  # zfs set mountpoint=/mnt/raid ssd
+  # zfs set atime=off ssd
+  # zpool import raid
+  # zfs set mountpoint=/mnt/raid raid
+  # zfs set atime=off raid # property wins over mount options)
   #
   # noauto is what keeps boot from hanging while the pools are not set up
   # yet: the generated zfs-import-<pool>.service is only pulled into
@@ -71,17 +71,17 @@
   # and that unit is a Type=oneshot with no start timeout ("no limit").
   # nofail alone only covers the .mount unit, not the import. Mount by hand
   # with `mount /mnt/raid`; drop both options once the pools import cleanly.
-  fileSystems."/mnt/raid" = lib.mkForce {
-    device = "raid"; # pool/dataset mounted at /mnt/raid
-    fsType = "zfs";
-    options = [ "zfsutil" "nofail" "noauto" ];
-  };
+  # fileSystems."/mnt/raid" = lib.mkForce {
+  #  device = "raid"; # pool/dataset mounted at /mnt/raid
+  #  fsType = "zfs";
+  #  options = [ "zfsutil" "nofail" "noauto" ];
+  # };
 
-  fileSystems."/mnt/ssd" = lib.mkForce {
-    device = "ssd"; # pool/dataset mounted at /mnt/ssd
-    fsType = "zfs";
-    options = [ "zfsutil" "nofail" "noauto" ];
-  };
+  # fileSystems."/mnt/ssd" = lib.mkForce {
+  #  device = "ssd"; # pool/dataset mounted at /mnt/ssd
+  #  fsType = "zfs";
+  #  options = [ "zfsutil" "nofail" "noauto" ];
+  #};
 
   # Pool maintenance: scrub checks pool integrity (monthly by default, every
   # imported pool). TRIM is already on by default once zfs is supported.
