@@ -124,4 +124,7 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  #solves steam download speedcxd
+  services.resolved.enable = true;
 }
