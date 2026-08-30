@@ -19,7 +19,7 @@
     # initialPassword (see MIGRATION.md, first boot).
     initialPassword = "change-me";
     openssh.authorizedKeys.keys = [
-      # "ssh-ed25519 AAAA... mig"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIO0eF5Cq8LZr6k5wCzNncsiuZ6ckOLzJOifICO7oPv4 mig"
     ];
     extraGroups = [
       "wheel"           # Enable sudo
@@ -34,6 +34,7 @@
   # System-wide packages
   environment.systemPackages = with pkgs; [
     git
+    gh
     wget
     curl
     btop

@@ -6,10 +6,13 @@
 # Per machine (as root): convert the SSH host key to an age public key:
 #   ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
 keys:
-  - &mig age1REPLACE_ME_WITH_OUTPUT_OF_AGE_KEYGEN
-  - &laptop age1REPLACE_ME_WITH_OUTPUT_OF_SSH_TO_AGE
-  - &desktop age1REPLACE_ME_WITH_OUTPUT_OF_SSH_TO_AGE
-  - &server age1REPLACE_ME_WITH_OUTPUT_OF_SSH_TO_AGE
+  - &mig age1mkg249qmqegz4g9mf0z4224tfqyxvnn04p7xuy7wlnrlaqda8auspnrqk7
+  - &laptop age176ump6gcp7j8vv9p9msq57lfne2dse4flcgyzws8hzxvc4zh998swur57n
+  # TODO: uncomment once the machine exists (as root:
+  #   ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub), then re-encrypt
+  #   (sops updatekeys secrets/secrets.yaml) so it can decrypt:
+  # - &desktop age1...
+  # - &server age1...
 
 creation_rules:
   - path_regex: ^secrets/.*\.yaml$
@@ -17,5 +20,5 @@ creation_rules:
       - age:
           - *mig
           - *laptop
-          - *desktop
-          - *server
+          # - *desktop
+          # - *server
