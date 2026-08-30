@@ -70,8 +70,8 @@
   services.nfs.server = {
     enable = true;
     exports = ''
-      /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+      /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=1000)
+      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=1000)
     '';
   };
 
