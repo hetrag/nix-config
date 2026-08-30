@@ -18,9 +18,9 @@ Search the repo for `TODO` and `REPLACE-ME`:
 
 - `hosts/server/hardware-configuration.nix` — placeholder; generate the real
   one at install (`nixos-generate-config --root /mnt`) and commit it.
-- `hosts/server/default.nix` — `/mnt/raid` and `/mnt/ssd` device + fsType.
-  If the raid is mdadm/zfs, the generated hardware-configuration brings the
-  extra config — keep it.
+- `hosts/server/default.nix` — `networking.hostId` (on the server:
+  `head -c 8 /etc/machine-id`) and the zfs pool/dataset names for
+  `/mnt/raid` and `/mnt/ssd` (`zpool status` after importing).
 - `modules/services/caddy.nix` — ACME email + confirm subdomains (check what
   nginx-proxy-manager currently answers for immich/open-webui).
 - `modules/core/default.nix` — NFS server IP `192.168.1.130`: confirm the new
@@ -108,15 +108,15 @@ Install:
    sudo mount ${DISK}-part1 /mnt/boot
    ```
    Do NOT mount /mnt/raid or /mnt/ssd here — the system mounts them on
-   first boot. (If the raid is mdadm: `sudo mdadm --assemble --scan` first
-   so nixos-generate-config sees it. If it's zfs: different flow — check
-   before starting.)
+   first boot. (The data disks are zfs pools: leave them completely alone
+   during install — no import, no mount. Import + set mountpoints after
+   first boot, as described in `hosts/server/default.nix`.)
 4. Generate + merge hardware config:
    `sudo nixos-generate-config --root /mnt`, then copy
    `/mnt/etc/nixos/hardware-configuration.nix` over the placeholder at
-   `hosts/server/hardware-configuration.nix`, and fill the `/mnt/raid` +
-   `/mnt/ssd` device TODOs in `hosts/server/default.nix` (`lsblk -f` shows
-   the filesystems). Put the repo at e.g. `/tmp/nix-config` on the installer.
+   `hosts/server/hardware-configuration.nix`, and fill the zfs TODOs in
+   `hosts/server/default.nix` (`networking.hostId` + the pool names). Put
+   the repo at e.g. `/tmp/nix-config` on the installer.
 5. Install — the first full build happens here; if it errors, fix and
    re-run (nothing is written to disk until the build succeeds):
    ```
