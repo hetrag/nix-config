@@ -1,7 +1,11 @@
 # Server: headless, and the NAS itself — /raid + /ssd are local zfs pools
 # that this host also exports over NFS to laptop/desktop (core defines the
 # client side of those mounts; here they are forced to be local).
-{ lib, ... }:
+#
+# Current phase: bare boot. Services and the NFS export are commented out
+# below; bring the zfs pools up first, then re-enable them one block at a
+# time (see MIGRATION.md).
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -32,11 +36,14 @@
   networking.hostName = "server";
   networking.useDHCP = true;
 
+  # zfs only supports kernels a few releases behind mainline, and the module
+  # build fails outright on a too-new one — so this host does not follow
+  # core's linuxPackages_latest.
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages;
+
   # ZFS for the two NAS pools. This pulls in the zfs kernel module +
   # userspace and enables the zfs-import@pool / zfs-mount units at boot.
-  # (zfs 2.4 builds fine against linuxPackages_latest in our pinned nixpkgs,
-  # so core's latest kernel is OK on this host.)
-  boot.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems.zfs = true;
   boot.zfs.forceImportRoot = false; # root is ext4; only data pools here
 
   # REQUIRED by zfs: pools are stamped with the host's id at import and
@@ -53,16 +60,19 @@
   #   zfs set mountpoint=/mnt/raid <pool>
   #   zfs set atime=off <pool>   # zfs's equivalent of ext4's noatime (the
   #                              # property wins over mount options)
+  #
+  # nofail: until the pools are actually imported, a failed mount must not
+  # keep the machine from booting. Drop it once the pools are settled.
   fileSystems."/mnt/raid" = lib.mkForce {
     device = "raid"; # pool/dataset mounted at /mnt/raid
     fsType = "zfs";
-    options = [ "zfsutil" ];
+    options = [ "zfsutil" "nofail" ];
   };
 
   fileSystems."/mnt/ssd" = lib.mkForce {
     device = "ssd"; # pool/dataset mounted at /mnt/ssd
     fsType = "zfs";
-    options = [ "zfsutil" ];
+    options = [ "zfsutil" "nofail" ];
   };
 
   # Pool maintenance: scrub checks pool integrity (monthly by default, every
@@ -85,31 +95,27 @@
   #  '';
   #};
 
-  # Day one: same reachability as the old docker setup (everything open to
-  # the LAN). Tighten as services migrate — the end state should be caddy
-  # (80/443), adguard (53) and the tailnet, plus NFS for the other hosts.
+  # Bare boot: ssh only. Uncomment a port together with the module that
+  # listens on it (caddy/adguard open their own; the rest belong to the
+  # docker stacks, which publish past the nixos firewall anyway).
   networking.firewall = {
     allowedTCPPorts = [
       22        # ssh
-      53        # adguard-home dns
-      80 443    # caddy
-      2049      # nfs
-      22000     # syncthing transfer
-      2283      # immich
-      3000      # open-webui
-      3456      # vikunja
-      51515     # kopia
-      6333 6334 # qdrant
-      7878      # radarr
-      8053      # adguard-home web ui
-      8181      # sabnzbd
-      8384      # syncthing gui
-      8989      # sonarr
+      # 2049      # nfs
+      # 22000     # syncthing transfer
+      # 2283      # immich
+      # 3000      # open-webui
+      # 3456      # vikunja
+      # 51515     # kopia
+      # 6333 6334 # qdrant
+      # 7878      # radarr
+      # 8181      # sabnzbd
+      # 8384      # syncthing gui
+      # 8989      # sonarr
     ];
     allowedUDPPorts = [
-      53        # adguard-home dns
-      21027     # syncthing local discovery
-      22000     # syncthing transfer (quic)
+      # 21027     # syncthing local discovery
+      # 22000     # syncthing transfer (quic)
     ];
   };
 

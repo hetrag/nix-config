@@ -4,6 +4,16 @@ From docker/portainer on the old server → NixOS (this flake). The plan:
 reinstall the OS disk only, bring the docker stacks back up unchanged
 ("stepping stone"), then migrate stack by stack to native services.
 
+Install is deliberately phased, so only one thing can be wrong at a time:
+
+1. **bare boot** (§2) — no services, no NFS, ssh only. `hosts/server/default.nix`
+   ships in this state: every service import is commented out and the pool
+   mounts carry `nofail`.
+2. **zfs** (§3) — import the two data pools and confirm they come back on
+   reboot.
+3. **services** (§4) — uncomment caddy, adguard and the stepping-stone stacks.
+4. **migrations** (§5) — one stack at a time, native.
+
 Deliberately dropped from the old setup: **nextcloud-aio** (re-add later if
 needed), **portainer** (replaced by this repo), **nginx-proxy-manager**
 (replaced by caddy), **pi-hole** (replaced by adguard-home).
@@ -14,17 +24,18 @@ Containers only for qdrant (no NixOS module).
 
 ## 0. Before touching the server — fill in the TODOs
 
-Search the repo for `TODO` and `REPLACE-ME`:
+Search the repo for `TODO` and `CHANGE-ME`:
 
 - `hosts/server/hardware-configuration.nix` — placeholder; generate the real
   one at install (`nixos-generate-config --root /mnt`) and commit it.
-- `hosts/server/default.nix` — `networking.hostId` (on the server:
-  `head -c 8 /etc/machine-id`) and the zfs pool/dataset names for
-  `/mnt/raid` and `/mnt/ssd` (`zpool status` after importing).
 - `modules/services/caddy.nix` — ACME email + confirm subdomains (check what
   nginx-proxy-manager currently answers for immich/open-webui).
 - `modules/core/default.nix` — NFS server IP `192.168.1.130`: confirm the new
-  server keeps this address (DHCP reservation).
+  server keeps this address (DHCP reservation on the **new** NIC's MAC).
+
+Already decided, do not change: `networking.hostId = "1767aa3a"` (the pools
+get stamped with it on first import) and the pool names `raid` / `ssd` in
+`hosts/server/default.nix`.
 
 ### Harvest from the old server (before the reinstall!)
 
@@ -40,25 +51,31 @@ From portainer's stack env / the host:
 Then take a kopia snapshot of `/mnt/ssd/server_config` and dump both
 databases (`immich`, `vikunja`) with `pg_dump -Fc`.
 
-## 1. Bootstrap sops (once, from any machine with the repo)
+## 1. Bootstrap sops
+
+Mostly done: `.sops.yaml` already carries `&mig`, `&laptop` and `&server`,
+and `secrets/secrets.yaml` already holds `anthropic_auth_token`, `ssh_key`
+and the `stepping-stone:` map. What is still open:
+
+- `&server` is the **old** machine's host key. The reinstall generates a new
+  one, so it must be replaced (install step 5, or first boot step 3).
+- `&desktop` is commented out until that machine exists.
+
+Reference, for a machine that needs a key:
 
 ```bash
 # personal edit key (never commit ~/.config/sops/age/keys.txt)
 nix-shell -p age -c age-keygen -o ~/.config/sops/age/keys.txt
 
-# per machine, on that machine as root (do server first):
+# per machine, on that machine as root:
 ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
 ```
 
-Paste the three public keys into `.sops.yaml` (replacing the REPLACE_ME
-placeholders), then create the secrets:
+Paste the age key into `.sops.yaml`, then
+`nix-shell -p sops --run 'sops updatekeys secrets/secrets.yaml'` and commit.
 
-```bash
-nix-shell -p sops -c sops secrets/secrets.yaml
-```
-
-Keys to create (keep `anthropic_auth_token` and `ssh_key` that are already
-there):
+Edit secrets with `nix-shell -p sops -c sops secrets/secrets.yaml`. Keys the
+later phases still need (keep the ones already there):
 
 ```yaml
 stepping-stone:
@@ -84,71 +101,168 @@ Prepare, while the old server is still running:
 - **Install Nix on the laptop you edit this repo from** (it has no nix —
   that also means none of this flake has ever been evaluated):
   `sh <(curl -L https://nixos.org/nix/install)`, then from the repo:
-  `nix build .#nixosConfigurations.server.config.system.build.toplevel`
-  This builds the whole server config offline of the server and catches
+  ```bash
+  nix --extra-experimental-features 'nix-command flakes' \
+    build .#nixosConfigurations.server.config.system.build.toplevel
+  ```
+  This builds the whole server config away from the server and catches
   errors while nothing is at stake. Fix anything it reports, commit.
 - Harvest the portainer values + take the dumps/snapshot (section 0).
-- Push the repo somewhere the server can reach (or carry it on the USB stick).
+- Push the repo somewhere the server can reach (or carry it on the USB
+  stick, together with `~/.config/sops/age/keys.txt` if you want to finish
+  sops during the install — step 5 below).
 
 Install:
 
-1. Write the NixOS 26.05 minimal ISO to a USB stick, boot the server from it.
+1. Write the NixOS 26.05 minimal ISO to a USB stick, boot the server from
+   it. Confirm it booted in UEFI mode — the config uses systemd-boot:
+   `ls /sys/firmware/efi` must exist.
 2. Identify the disks — OS disk vs the raid/ssd data disks:
-   `lsblk -o NAME,SIZE,MODEL,SERIAL`
-3. Partition ONLY the OS disk (config expects UEFI + systemd-boot):
-   ```
+   `lsblk -o NAME,SIZE,MODEL,SERIAL`. Sanity-check the pools are intact
+   *without* importing them: `sudo zpool import` (no pool name) just lists
+   what it finds. Note the exact pool names it prints.
+3. Partition ONLY the OS disk:
+   ```bash
    DISK=/dev/disk/by-id/ata-YOUR-OS-DISK
    sudo sgdisk --zap-all $DISK
    sudo sgdisk -n 1:0:+1G -t 1:EF00 $DISK    # /boot (ESP)
-   sudo sgdisk -n 2:0:0   -t 2:8300 $DISK    # /
+   sudo sgdisk -n 2:0:+1000G   -t 2:8300 $DISK    # /
+   sudo sgdisk -n 3:0:0   -t 3:8300 $DISK    # /
+   sudo udevadm settle                       # wait for the -partN links
    sudo mkfs.vfat -F32 -n BOOT ${DISK}-part1
    sudo mkfs.ext4 -L nixos  ${DISK}-part2
+   sudo mkfs.ext4 -L data  ${DISK}-part3
    sudo mount ${DISK}-part2 /mnt
    sudo mkdir -p /mnt/boot
    sudo mount ${DISK}-part1 /mnt/boot
+   sudo mkdir -p /mnt/data
+   sudo mount ${DISK}-part3 /mnt/data
    ```
-   Do NOT mount /mnt/raid or /mnt/ssd here — the system mounts them on
-   first boot. (The data disks are zfs pools: leave them completely alone
-   during install — no import, no mount. Import + set mountpoints after
-   first boot, as described in `hosts/server/default.nix`.)
-4. Generate + merge hardware config:
+   Do NOT import the pools and do NOT mount /mnt/raid or /mnt/ssd — that is
+   phase 2, after the machine boots on its own.
+4. Generate the hardware config:
    `sudo nixos-generate-config --root /mnt`, then copy
    `/mnt/etc/nixos/hardware-configuration.nix` over the placeholder at
-   `hosts/server/hardware-configuration.nix`, and fill the zfs TODOs in
-   `hosts/server/default.nix` (`networking.hostId` + the pool names). Put
-   the repo at e.g. `/tmp/nix-config` on the installer.
-5. Install — the first full build happens here; if it errors, fix and
+   `hosts/server/hardware-configuration.nix` in your copy of the repo (put
+   it at e.g. `/tmp/nix-config`). It should contain `/`, `/boot` and
+   `/mnt/data`; delete anything it wrote for the data pools — the host
+   module owns those.
+5. Optional but saves a round trip — create the SSH host key now, so sops
+   works from the very first boot (NixOS keeps an existing key):
+   ```bash
+   sudo mkdir -p /mnt/etc/ssh
+   sudo ssh-keygen -t ed25519 -N "" -C server -f /mnt/etc/ssh/ssh_host_ed25519_key
+   nix-shell -p ssh-to-age --run 'ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub'
+   ```
+   Put that age key in `.sops.yaml` as `&server`, then re-encrypt so the new
+   key becomes a recipient:
+   ```bash
+   nix-shell -p sops --run 'sops updatekeys secrets/secrets.yaml'
+   ```
+   `updatekeys` **decrypts** the file before re-encrypting it, so it only
+   runs where a key that is already a recipient exists — your personal age
+   key, `~/.config/sops/age/keys.txt` (`&mig`). The live installer has no
+   such key unless you copied it onto the USB stick; point sops at it with
+   `export SOPS_AGE_KEY_FILE=/path/to/keys.txt` (the installer's `$HOME` is
+   not yours). If you didn't bring it, do this on the laptop instead and
+   copy the repo to the server again.
+
+   Skipping step 5 entirely is fine — it just moves the same work to first
+   boot (step 3 below).
+6. **`git add -A`** in `/tmp/nix-config`. Flakes ignore untracked files, so
+   a freshly copied `hardware-configuration.nix` is invisible until git
+   knows about it — you would silently install the placeholder.
+7. Install — the first full build happens here; if it errors, fix and
    re-run (nothing is written to disk until the build succeeds):
+   ```bash
+   sudo nixos-install --flake /tmp/nix-config#server
    ```
-   cd /tmp/nix-config
-   sudo nixos-install --flake .#server
-   ```
-   (If the installer complains flakes aren't enabled, prefix the command
-   with `NIX_CONFIG="experimental-features = nix-command flakes"`.)
+   (If the installer complains flakes aren't enabled, prefix with
+   `NIX_CONFIG="experimental-features = nix-command flakes"`.)
    Set the root password when prompted, unplug the USB stick, reboot.
 
-### First boot (console, as root)
+### First boot (console)
 
-1. Log in as root (the password from nixos-install). Then as mig (console,
-   password `change-me` from core): set a real password with `passwd`, put
-   your SSH public key into `users.users.mig.openssh.authorizedKeys.keys`
-   in `modules/core`, and delete `initialPassword`.
-2. Give sops this host's key: `ssh-to-age <
-   /etc/ssh/ssh_host_ed25519_key.pub`. On the laptop, paste it into
-   `.sops.yaml` (`&server`), re-encrypt and commit:
-   `nix-shell -p sops -c sops updatekeys secrets/secrets.yaml`
-3. On the server: pull the repo, `sudo nixos-rebuild switch --flake .#server`,
-   then restart the stacks (they started before the secrets existed):
-   `sudo systemctl restart 'stack-*'`
-4. `sudo tailscale up` (then on laptop/desktop too).
-5. Adguard: open `http://<server>:8053`, initial setup, import blocklists,
-   add DNS rewrite `*.jgelectronics.dk -> <server LAN IP>`.
-6. Router: DHCP DNS still points at the server (pi-hole's old job), and the
-   server keeps 192.168.1.130 (DHCP reservation).
-7. Verify: caddy issued certs (`journalctl -u caddy`), NFS mounts work from
-   laptop/desktop, every app answers on its usual URL, kopia UI works.
+The machine comes up bare: ssh, tailscale, and nothing else.
 
-## 3. Migrations, one at a time
+1. Log in as mig (password `change-me` from core), `passwd` to set a real
+   one, then remove `initialPassword` from `modules/core/default.nix` on the
+   next rebuild. Your SSH public key is already deployed by core, so key
+   login should work immediately.
+2. `systemctl --failed`. Expect exactly `zfs-import-raid` and
+   `zfs-import-ssd` — the pools aren't imported yet, and `nofail` on the
+   mounts is what kept that from blocking the boot. Anything else is a real
+   problem.
+3. If you skipped step 5 above, sops has no key for this host yet
+   (`/run/secrets` is empty and `~/.ssh/id_ed25519` is a dangling symlink).
+   Fix it now: `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub`, paste into
+   `.sops.yaml` as `&server` on the laptop,
+   `nix-shell -p sops --run 'sops updatekeys secrets/secrets.yaml'`, commit.
+4. Get the repo onto the server, then
+   `sudo nixos-rebuild switch --flake .#server`.
+5. `sudo tailscale up` (then on laptop/desktop too).
+6. Router: give the new NIC's MAC the 192.168.1.130 reservation. Leave the
+   DHCP DNS server pointing at the old pi-hole until §4.
+
+Stop here until the machine reboots cleanly twice.
+
+## 3. Bring up the ZFS pools
+
+The pools were last imported by the old server, which had a different
+hostid, so the first import needs `-f`. That stamps them with this host's
+`hostId` — after that, the boot-time import units work unattended.
+
+```bash
+sudo zpool import           # confirm the names
+sudo zpool import -f raid
+sudo zpool import -f ssd
+sudo zpool status           # no errors, all vdevs ONLINE
+sudo zfs list
+```
+
+If the pools are named something other than `raid` / `ssd`, either import
+under a new name (`sudo zpool import -f oldname raid`) or change `device` in
+`hosts/server/default.nix` — the mount entries, and the systemd import units
+generated from them, are keyed on the pool name.
+
+Then point them at the mountpoints the config expects:
+
+```bash
+sudo zfs set mountpoint=/mnt/raid raid
+sudo zfs set mountpoint=/mnt/ssd  ssd
+sudo zfs set atime=off raid
+sudo zfs set atime=off ssd
+```
+
+Reboot. `/mnt/raid` and `/mnt/ssd` must be mounted with no failed units and
+the old data must be there (`ls /mnt/ssd/server_config`). Only once that
+survives a reboot:
+
+- drop `nofail` from both `fileSystems` entries in `hosts/server/default.nix`
+  (from here on, a missing pool *should* stop the boot rather than silently
+  bring services up on an empty directory),
+- uncomment the `services.nfs.server` block and port 2049,
+- `nixos-rebuild switch`, then verify the mounts from laptop/desktop.
+
+## 4. Enable the services
+
+Uncomment in `hosts/server/default.nix`, one rebuild at a time:
+
+1. `caddy.nix` — needs the ACME email set and DNS/port-forwarding for
+   80/443. It opens its own ports. Check `journalctl -u caddy` for issued
+   certs.
+2. `adguard.nix` — opens its own ports. Open `http://<server>:8053`, run
+   the initial setup, import the pi-hole blocklists, add the DNS rewrite
+   `*.jgelectronics.dk -> <server LAN IP>`. Only then repoint the router's
+   DHCP DNS at the new server.
+3. `stepping-stone` — the docker stacks. They need their firewall ports
+   uncommented (docker publishes past the nixos firewall anyway, so this is
+   mostly bookkeeping). The secrets must already decrypt; if a stack started
+   before that, `sudo systemctl restart 'stack-*'`.
+
+Verify: every app answers on its usual URL, kopia UI works.
+
+## 5. Migrations, one at a time
 
 For each: stop the stack, move data, enable the module in
 `hosts/server/default.nix` (uncomment the import), `nixos-rebuild switch`,
