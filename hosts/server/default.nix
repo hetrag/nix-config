@@ -21,7 +21,7 @@
     # roughly this order)
     # ../../modules/services/postgres.nix
     # ../../modules/services/syncthing.nix
-    # ../../modules/services/arr.nix
+    ../../modules/services/arr.nix
     # ../../modules/services/open-webui.nix
     # ../../modules/services/vikunja.nix
     # ../../modules/services/authentik.nix
@@ -88,10 +88,10 @@
       # 3456      # vikunja
       # 51515     # kopia
       # 6333 6334 # qdrant
-      # 7878      # radarr
-      # 8181      # sabnzbd
+      7878      # radarr
+      8181      # sabnzbd
       # 8384      # syncthing gui
-      # 8989      # sonarr
+      8989      # sonarr
     ];
     allowedUDPPorts = [
       # 21027     # syncthing local discovery

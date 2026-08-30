@@ -297,11 +297,41 @@ Config dir is used in place (`/mnt/ssd/server_config/syncthing`) — just
 Later (optional): declare folders/devices in `settings` instead of the UI.
 
 ### arr (sonarr/radarr/sabnzbd)
-Down the stack, then per app:
-`rsync -a /mnt/ssd/server_config/sonarr/ /var/lib/sonarr/` (etc.),
-`chown -R sonarr:media /var/lib/sonarr` (etc.), enable `arr.nix`, set
-**umask 002** in each app's UI (Settings → Media Management), delete stack,
-remove 8989/7878/8181 from the firewall (tailnet access remains).
+
+All paths are in the `let` block at the top of `modules/services/arr.nix` —
+config dirs are NixOS options, sabnzbd's download dirs are declared in
+`settings.misc`, but sonarr/radarr **root folders live in their sqlite db**
+and can only be changed in the UI.
+
+```bash
+docker compose -f /etc/stepping-stone/arr/compose.yml down   # frees 8989/7878/8181
+for a in sonarr radarr sabnzbd; do
+  sudo rsync -a /mnt/ssd/server_config/$a/ /var/lib/$a/
+done
+# the container kept MediaCover on the raid pool, outside /config
+sudo rsync -a /mnt/raid/bulkdata/sonarr/MediaCover/ /var/lib/sonarr/MediaCover/
+sudo rsync -a /mnt/raid/bulkdata/radarr/MediaCover/ /var/lib/radarr/MediaCover/
+sudo chown -R sonarr:media /var/lib/sonarr
+sudo chown -R radarr:media /var/lib/radarr
+sudo chown -R sabnzbd:media /var/lib/sabnzbd
+```
+
+Enable `arr.nix`, `nixos-rebuild switch`, then fix the paths that were
+container paths:
+
+- sonarr → Settings → Media Management → Root Folders: `/series` becomes
+  `/mnt/raid/media/series` (and Series → Mass Editor → Root Folder to move
+  every series onto it). Radarr: `/movies` → `/mnt/raid/media/movies`.
+- sonarr/radarr → Settings → Download Clients → sabnzbd: remove the remote
+  path mapping if one exists; sabnzbd now reports real host paths.
+- sabnzbd's own `download_dir`/`complete_dir` are set by nix, so its ini is
+  already correct on first start.
+
+umask no longer needs setting in the UI — the units run with `UMask=0002`
+and sabnzbd with `permissions = "0775"`.
+
+Then: delete the stack, remove 8989/7878/8181 from the firewall (tailnet
+access remains).
 
 ### open-webui
 `rsync -a /mnt/ssd/server_config/open-webui/ /var/lib/open-webui/`, enable
