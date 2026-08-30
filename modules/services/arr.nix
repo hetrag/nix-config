@@ -23,5 +23,10 @@
     group = "media";
     openFirewall = true;
     allowConfigWrite = true;
+    settings = {
+      misc = {
+        host = "0.0.0.0";
+      };
+    };
   };
 }
