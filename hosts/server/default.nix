@@ -54,34 +54,6 @@
   # Set it once and NEVER change it.
   networking.hostId = "1767aa3a";
 
-  # The NAS disks are local zpools on this host — override core's NFS client
-  # mounts. device is the pool (or dataset) name, NOT a /dev/disk path, and
-  # that dataset's mountpoint property must be set to the mount path. Once,
-  # on the server (per pool):
-  # zpool import ssd
-  # zfs set mountpoint=/mnt/raid ssd
-  # zfs set atime=off ssd
-  # zpool import raid
-  # zfs set mountpoint=/mnt/raid raid
-  # zfs set atime=off raid # property wins over mount options)
-  #
-  # noauto is what keeps boot from hanging while the pools are not set up
-  # yet: the generated zfs-import-<pool>.service is only pulled into
-  # zfs-import.target when *not* every filesystem of that pool is noauto,
-  # and that unit is a Type=oneshot with no start timeout ("no limit").
-  # nofail alone only covers the .mount unit, not the import. Mount by hand
-  # with `mount /mnt/raid`; drop both options once the pools import cleanly.
-  # fileSystems."/mnt/raid" = lib.mkForce {
-  #  device = "raid"; # pool/dataset mounted at /mnt/raid
-  #  fsType = "zfs";
-  #  options = [ "zfsutil" "nofail" "noauto" ];
-  # };
-
-  # fileSystems."/mnt/ssd" = lib.mkForce {
-  #  device = "ssd"; # pool/dataset mounted at /mnt/ssd
-  #  fsType = "zfs";
-  #  options = [ "zfsutil" "nofail" "noauto" ];
-  #};
 
   # Pool maintenance: scrub checks pool integrity (monthly by default, every
   # imported pool). TRIM is already on by default once zfs is supported.
@@ -95,13 +67,13 @@
   # or clients won't see them.
   # anongid=2000 = the media group from modules/core, so NFS clients get
   # group access to anything the services write as group "media".
-  #services.nfs.server = {
-  #  enable = true;
-  #  exports = ''
-  #    /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-  #    /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-  #  '';
-  #};
+  services.nfs.server = {
+    enable = true;
+    exports = ''
+      /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+    '';
+  };
 
   # Bare boot: ssh only. Uncomment a port together with the module that
   # listens on it (caddy/adguard open their own; the rest belong to the
