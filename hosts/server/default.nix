@@ -56,9 +56,13 @@
   # mounts. device is the pool (or dataset) name, NOT a /dev/disk path, and
   # that dataset's mountpoint property must be set to the mount path. Once,
   # on the server (per pool):
-  #   zpool import <pool>
-  #   zfs set mountpoint=/mnt/raid <pool>
-  #   zfs set atime=off <pool>   # zfs's equivalent of ext4's noatime (the
+  zpool import ssd
+  zfs set mountpoint=/mnt/raid ssd
+  zfs set atime=off ssd
+  zpool import raid
+  zfs set mountpoint=/mnt/raid raid
+  zfs set atime=off raid
+  
   #                              # property wins over mount options)
   #
   # noauto is what keeps boot from hanging while the pools are not set up
