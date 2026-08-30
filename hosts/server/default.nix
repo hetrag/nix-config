@@ -43,7 +43,7 @@
   # refuse to import without it. Any unique 8 lowercase hex chars — on the
   # running server: head -c 8 /etc/machine-id
   # Set it once and NEVER change it.
-  networking.hostId = "CHANGE-ME";
+  networking.hostId = "1767aa3a";
 
   # The NAS disks are local zpools on this host — override core's NFS client
   # mounts. device is the pool (or dataset) name, NOT a /dev/disk path, and
