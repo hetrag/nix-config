@@ -82,8 +82,8 @@
     allowedTCPPorts = [
       22        # ssh
       2049      # nfs
-      8053      #adguard
-      53
+      8053      #adguard      
+      53        #adguard
       # 22000     # syncthing transfer
       # 2283      # immich
       # 3000      # open-webui
@@ -98,7 +98,7 @@
     allowedUDPPorts = [
       # 21027     # syncthing local discovery
       # 22000     # syncthing transfer (quic)
-      53
+      53          #adguard
     ];
   };
 
