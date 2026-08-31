@@ -60,24 +60,9 @@
   # imported pool). TRIM is already on by default once zfs is supported.
   services.zfs.autoScrub.enable = true;
 
-  # Serve the same paths to laptop/desktop. Nothing zfs-specific needed here:
-  # exports reference the mount paths, not the underlying fs. Keep all NFS
-  # config in this block (don't also set the zfs `sharenfs` property on the
-  # pools — pick one mechanism). If you ever create child datasets under
-  # /mnt/raid (each is a separate mount), add `crossmnt` to that export line
-  # or clients won't see them.
-  # anongid=2000 = the media group from modules/core, so NFS clients get
-  # group access to anything the services write as group "media".
-  # insecure: clients connect from source ports >1024 (Windows' "Client for
-  # NFS" does, so it can't mount without it).
-  # NFSv3 only — everything moved off v4 so the Windows box can mount too
-  # (its client speaks v3). vers4=n goes into /etc/nfs.conf's [nfsd] section.
-  # mountd/statd/lockd are v3's sideband daemons: v4 needs nothing but 2049,
-  # v3 also needs rpcbind 111 + these three, pinned so the firewall below
-  # can open them.
   services.nfs.server = {
     enable = true;
-    extraNfsdConfig = "vers4=n";
+    extraNfsdConfig = '''';
     mountdPort = 4000;
     statdPort = 4001;
     lockdPort = 4002;
