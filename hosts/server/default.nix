@@ -23,7 +23,7 @@
     # ../../modules/services/syncthing.nix
     ../../modules/services/arr.nix
     ../../modules/services/qdrant.nix
-    # ../../modules/services/open-webui.nix
+    ../../modules/services/open-webui.nix
     # ../../modules/services/vikunja.nix
      ../../modules/services/authentik.nix
     # ../../modules/services/immich.nix
@@ -87,7 +87,7 @@
       53        #adguard
       # 22000     # syncthing transfer
       # 2283      # immich
-      # 3000      # open-webui
+      3000      # open-webui
       # 3456      # vikunja
       # 51515     # kopia
       6333 
