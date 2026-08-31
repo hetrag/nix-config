@@ -127,9 +127,11 @@
 
   #solves steam download speedcxd
   services.resolved = {
-  enable = true;
-  extraConfig = ''
-    DNSStubListener=no
-  '';
-  }; 
+    enable = true;
+    settings = {
+      Resolve = {
+        DNSStubListener = "no";
+      };
+    };
+  };
 }
