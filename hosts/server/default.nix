@@ -98,6 +98,7 @@
     allowedUDPPorts = [
       # 21027     # syncthing local discovery
       # 22000     # syncthing transfer (quic)
+      53
     ];
   };
 
