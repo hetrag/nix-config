@@ -34,7 +34,7 @@
   };
 
   # adguard-home binds :53; keep systemd-resolved's stub listener out of its way
-  services.resolved.settings.Resolve.DNSStubListener = "no";
+  
 
   # TODO after first boot, in the AdGuard UI — this replaces what pi-hole
   # did for the LAN:
