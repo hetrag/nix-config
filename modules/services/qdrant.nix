@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  hsnw_index = {
+  hnsw_index = {
     on_disk = true;
   };
   service = {
