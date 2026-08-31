@@ -12,7 +12,7 @@
     ./hardware-configuration.nix
 
     # ---- Foundation, enabled from day one ----
-    #../../modules/services/caddy.nix
+    ../../modules/services/caddy.nix
     ../../modules/services/adguard.nix
     #../../modules/services/stepping-stone
 
@@ -25,7 +25,7 @@
     ../../modules/services/qdrant.nix
     # ../../modules/services/open-webui.nix
     # ../../modules/services/vikunja.nix
-    # ../../modules/services/authentik.nix
+     ../../modules/services/authentik.nix
     # ../../modules/services/immich.nix
     # ../../modules/services/kopia.nix
   ];
