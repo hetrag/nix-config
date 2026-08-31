@@ -57,6 +57,8 @@
     };
   };
 
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+
   # Tailnet on every host: admin access to the servers without exposing
   # anything publicly. First run needs a manual `sudo tailscale up`.
   services.tailscale = {
