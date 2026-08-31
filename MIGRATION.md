@@ -152,7 +152,7 @@ Install:
    ```bash
    sudo mkdir -p /mnt/etc/ssh
    sudo ssh-keygen -t ed25519 -N "" -C server -f /mnt/etc/ssh/ssh_host_ed25519_key
-   nix-shell -p ssh-to-age --run 'ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub'
+   sudo nix-shell -p ssh-to-age --run 'ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub'
    ```
    Put that age key in `.sops.yaml` as `&server`, then re-encrypt so the new
    key becomes a recipient:
