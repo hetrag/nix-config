@@ -13,7 +13,7 @@
 
     # ---- Foundation, enabled from day one ----
     #../../modules/services/caddy.nix
-    #../../modules/services/adguard.nix
+    ../../modules/services/adguard.nix
     #../../modules/services/stepping-stone
 
     # ---- Native replacements, enabled one at a time as stacks migrate ----
