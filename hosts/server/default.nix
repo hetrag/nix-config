@@ -89,7 +89,7 @@
       # 3000      # open-webui
       # 3456      # vikunja
       # 51515     # kopia
-      # 6333 6334 # qdrant
+      6333 6334 # qdrant
       7878      # radarr
       8181      # sabnzbd
       # 8384      # syncthing gui
