@@ -22,6 +22,7 @@
     # ../../modules/services/postgres.nix
     # ../../modules/services/syncthing.nix
     ../../modules/services/arr.nix
+    ../../modules/services/qdrant.nix
     # ../../modules/services/open-webui.nix
     # ../../modules/services/vikunja.nix
     # ../../modules/services/authentik.nix
