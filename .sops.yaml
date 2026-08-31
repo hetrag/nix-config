@@ -8,7 +8,7 @@
 keys:
   - &mig age1mkg249qmqegz4g9mf0z4224tfqyxvnn04p7xuy7wlnrlaqda8auspnrqk7
   - &laptop age176ump6gcp7j8vv9p9msq57lfne2dse4flcgyzws8hzxvc4zh998swur57n
-  - &server age1gehhvcagv3l97d83aeqr3cxja5j20alk6ka9vmupawy2n8r69pjqdcdcl4
+  - &server age1279lsskgrmmtpjgpecpefeulk9xgx6tk9j8alydt3t7ddpc55puq0azh2m
   - &desktop age10wytwcndhvrvvrdk7j89kgrw7n6s7tjcez7lqgtlpk28z0hlld4sh74kyd
 
 creation_rules:
