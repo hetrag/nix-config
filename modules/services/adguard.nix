@@ -6,6 +6,8 @@
   services.adguardhome = {
     enable = true;
     openFirewall = true; # DNS (53) + web UI
+    host = "0.0.0.0";
+    port = 8053
     # First configuration happens through the web UI; once it is settled,
     # consider locking it down declaratively (mutableSettings = false) —
     # see MIGRATION.md.
