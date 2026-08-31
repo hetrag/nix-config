@@ -82,6 +82,7 @@
     allowedTCPPorts = [
       22        # ssh
       2049      # nfs
+      8053      #adguard
       # 22000     # syncthing transfer
       # 2283      # immich
       # 3000      # open-webui
