@@ -90,10 +90,11 @@
 
   # NAS data. The server hosts these disks locally and re-exports them over
   # NFS (see the mkForce overrides in hosts/server/default.nix); every other
-  # host mounts them as an NFS client.
+  # host mounts them as an NFS client. v3, not v4: the server is v3-only so
+  # the Windows box can mount too ("Client for NFS" only speaks v3).
   fileSystems."/mnt/raid" = {
     device = "192.168.1.130:/mnt/raid";
-    fsType = "nfs4";
+    fsType = "nfs";
     options = [
       "defaults"
       "user"
@@ -106,7 +107,7 @@
 
   fileSystems."/mnt/ssd" = {
     device = "192.168.1.130:/mnt/ssd";
-    fsType = "nfs4";
+    fsType = "nfs";
     options = [
       "defaults"
       "user"

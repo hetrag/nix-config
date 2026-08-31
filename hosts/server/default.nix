@@ -68,8 +68,19 @@
   # or clients won't see them.
   # anongid=2000 = the media group from modules/core, so NFS clients get
   # group access to anything the services write as group "media".
+  # insecure: clients connect from source ports >1024 (Windows' "Client for
+  # NFS" does, so it can't mount without it).
+  # NFSv3 only — everything moved off v4 so the Windows box can mount too
+  # (its client speaks v3). vers4=n goes into /etc/nfs.conf's [nfsd] section.
+  # mountd/statd/lockd are v3's sideband daemons: v4 needs nothing but 2049,
+  # v3 also needs rpcbind 111 + these three, pinned so the firewall below
+  # can open them.
   services.nfs.server = {
     enable = true;
+    extraNfsdConfig = "vers4=n";
+    mountdPort = 4000;
+    statdPort = 4001;
+    lockdPort = 4002;
     exports = ''
       /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
       /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
@@ -82,7 +93,11 @@
   networking.firewall = {
     allowedTCPPorts = [
       22        # ssh
+      111       # rpcbind (nfsv3)
       2049      # nfs
+      4000      # mountd (nfsv3)
+      4001      # statd (nfsv3)
+      4002      # lockd (nfsv3)
       8053      #adguard      
       53        #adguard
       # 22000     # syncthing transfer
@@ -101,6 +116,11 @@
       # 21027     # syncthing local discovery
       # 22000     # syncthing transfer (quic)
       53          #adguard
+      111         # rpcbind (nfsv3)
+      2049        # nfs (v3 may negotiate udp)
+      4000        # mountd (nfsv3)
+      4001        # statd (nfsv3)
+      4002        # lockd (nfsv3)
     ];
   };
 

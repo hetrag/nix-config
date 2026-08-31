@@ -25,7 +25,11 @@
       OPENID_PROVIDER_URL = "https://auth.jgelectronics.dk/application/o/open-webui/.well-known/openid-configuration";
       OPENID_REDIRECT_URI = "https://openwebui.jgelectronics.dk/oauth/oidc/callback";
       # The nixpkgs module defaults this to http://localhost:3000, which
-      # breaks OIDC redirect/logout — override with the public URL.
+      # breaks OIDC redirect/logout — override with the public URL. NOTE:
+      # open-webui (0.11) persists config in webui.db with env vars as
+      # defaults for MISSING rows only (ENABLE_PERSISTENT_CONFIG=True) — the
+      # localhost value seeded before this override had to be corrected once
+      # in Admin Panel -> Settings -> General -> WebUI URL.
       WEBUI_URL = "https://openwebui.jgelectronics.dk";
       # Create users on first login and merge them with local accounts that
       # share the authentik email (picks up the migrated admin account).
