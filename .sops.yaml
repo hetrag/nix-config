@@ -8,7 +8,7 @@
 keys:
   - &mig age1mkg249qmqegz4g9mf0z4224tfqyxvnn04p7xuy7wlnrlaqda8auspnrqk7
   - &laptop age176ump6gcp7j8vv9p9msq57lfne2dse4flcgyzws8hzxvc4zh998swur57n
-  - &server age1fq3vdwetwajzje74sp58mfzdngh3qu9qcpcaxmuvq4cjpvjzsg8qmejre9
+  - &server age1tj4mvvkvqd8q98mjwagcv9werec9jp36peqv0cx5e0s5x8lg9c4sz7m3lc
 # TODO: uncomment once the machine exists (as root:
   #   ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub), then re-encrypt
   #   (sops updatekeys secrets/secrets.yaml) so it can decrypt:
