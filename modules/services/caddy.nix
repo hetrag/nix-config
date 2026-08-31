@@ -9,7 +9,7 @@
     enable = true;
     # ACME account email — TODO: set your real address
     globalConfig = ''
-      email CHANGE-ME@example.com
+      email jens@gammeltoft.org
     '';
     virtualHosts = {
       # TODO: match the subdomains currently configured in
