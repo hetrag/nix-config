@@ -126,11 +126,10 @@
   nixpkgs.config.allowUnfree = true;
 
   #solves steam download speedcxd
-
   services.resolved = {
   enable = true;
   extraConfig = ''
     DNSStubListener=no
   '';
-  };
+  }; 
 }
