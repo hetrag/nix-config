@@ -16,6 +16,7 @@
     host = "127.0.0.1";
     port = 3000;
     environment = {
+      ENABLE_PERSISTENT_CONFIG = "false";
       ENABLE_AUTOCOMPLETE_GENERATION = "false";
       ENABLE_FOLLOW_UP_GENERATION = "false";
       ENABLE_TITLE_GENERATION = "false";
@@ -24,18 +25,15 @@
       OAUTH_PROVIDER_NAME = "authentik";
       OPENID_PROVIDER_URL = "https://auth.jgelectronics.dk/application/o/open-webui/.well-known/openid-configuration";
       OPENID_REDIRECT_URI = "https://openwebui.jgelectronics.dk/oauth/oidc/callback";
-      # The nixpkgs module defaults this to http://localhost:3000, which
-      # breaks OIDC redirect/logout — override with the public URL. NOTE:
-      # open-webui (0.11) persists config in webui.db with env vars as
-      # defaults for MISSING rows only (ENABLE_PERSISTENT_CONFIG=True) — the
-      # localhost value seeded before this override had to be corrected once
-      # in Admin Panel -> Settings -> General -> WebUI URL.
       WEBUI_URL = "https://openwebui.jgelectronics.dk";
-      # Create users on first login and merge them with local accounts that
-      # share the authentik email (picks up the migrated admin account).
-      # Local password login stays enabled as fallback until SSO is proven.
       ENABLE_OAUTH_SIGNUP = "true";
       OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "true";
+
+      # LiteLLM Integration
+      ENABLE_OPENAI_API = "true";
+      OPENAI_API_BASE_URL = "http://127.0.0.1:5000/v1";
+      ENABLE_OLLAMA_API = "false"; # Disables continuous polling on port 11434
+
     };
     environmentFile = config.sops.templates."open-webui-env".path;
   };
