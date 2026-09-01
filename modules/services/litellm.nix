@@ -25,7 +25,7 @@
         {
           model_name = "glm5-3-coding";
           litellm_params = {
-            model = "zai/glm-5.3";
+            model = "openai/glm-5.3";
             api_base = "https://api.z.ai/api/coding/paas/v4";
             api_key = "os.environ/ZAI_API_KEY";
           };
@@ -42,6 +42,6 @@
   sops.templates."litellm-env".content = ''
     LITELLM_MASTER_KEY=${config.sops.placeholder."litellm/master_key"}
     FIREWORKS_API_KEY=${config.sops.placeholder."litellm/fireworks_api_key"}
-    Z_AI_API_KEY=${config.sops.placeholder."litellm/z_ai_api_key"}
+    ZAI_API_KEY=${config.sops.placeholder."litellm/zai_api_key"}
   '';
 }
