@@ -46,6 +46,7 @@
     sops        # Edit encrypted secrets
     age         # Personal encryption key for sops
     ssh-to-age  # Convert SSH host keys to age keys for .sops.yaml
+    jq
   ];
 
   # SSH access, keys only — the host key also serves as sops-nix's decryption key
