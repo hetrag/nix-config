@@ -37,7 +37,7 @@
   # Secrets managed via sops-nix
   sops.secrets."litellm/master_key" = { };
   sops.secrets."litellm/fireworks_api_key" = { };
-  sops.secrets."litellm/z_ai_api_key" = { };
+  sops.secrets."litellm/zai_api_key" = { };
 
   sops.templates."litellm-env".content = ''
     LITELLM_MASTER_KEY=${config.sops.placeholder."litellm/master_key"}
