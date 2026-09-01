@@ -25,7 +25,7 @@
         {
           model_name = "glm5-3-coding";
           litellm_params = {
-            model = "openai/glm-5.3";
+            model = "glm-5.3";
             api_base = "https://api.z.ai/api/coding/paas/v4";
             api_key = "os.environ/ZAI_API_KEY";
           };
