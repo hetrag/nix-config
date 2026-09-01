@@ -28,6 +28,7 @@
      ../../modules/services/authentik.nix
     # ../../modules/services/immich.nix
     # ../../modules/services/kopia.nix
+    ../../modules/services/lite_llm.nix
   ];
 
   # Bootloader (UEFI / systemd-boot default)
@@ -88,6 +89,7 @@
       # 22000     # syncthing transfer
       # 2283      # immich
       3000      # open-webui
+      5000        # lite llm
       # 3456      # vikunja
       # 51515     # kopia
       6333 

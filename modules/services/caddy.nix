@@ -24,6 +24,9 @@
       "vikunja.jgelectronics.dk".extraConfig = ''
         reverse_proxy 127.0.0.1:3456
       '';
+      "litellm.jgelectronics.dk".extraConfig = ''
+        reverse_proxy 127.0.0.1:5000
+      '';
       # Goes live together with modules/services/authentik.nix
       "auth.jgelectronics.dk".extraConfig = ''
         reverse_proxy 127.0.0.1:9000
