@@ -28,7 +28,7 @@
      ../../modules/services/authentik.nix
     # ../../modules/services/immich.nix
     # ../../modules/services/kopia.nix
-    ../../modules/services/lite_llm.nix
+    ../../modules/services/litellm.nix
   ];
 
   # Bootloader (UEFI / systemd-boot default)
