@@ -38,8 +38,15 @@
     environmentFile = config.sops.templates."open-webui-env".path;
   };
 
+  systemd.services.open-webui = {
+    after = [ "litellm.service" ];
+    wants = [ "litellm.service" ];
+  };
+
   sops.secrets."open-webui/oauth_client_secret" = { };
+  sops.secrets."litellm/master_key" = { };
   sops.templates."open-webui-env".content = ''
     OAUTH_CLIENT_SECRET=${config.sops.placeholder."open-webui/oauth_client_secret"}
+    OPENAI_API_KEY=${config.sops.placeholder."litellm/master_key"}
   '';
 }
