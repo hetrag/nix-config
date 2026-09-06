@@ -96,7 +96,7 @@
       6333 
       6334 # qdrant
       7878      # radarr
-      8181      # sabnzbd
+      8080      # sabnzbd
       # 8384      # syncthing gui
       8989      # sonarr
     ];

@@ -35,7 +35,7 @@
         reverse_proxy 127.0.0.1:9000
       '';
       "sabnzbd.jgelectronics.dk".extraConfig = ''
-        reverse_proxy 127.0.0.1:8181
+        reverse_proxy 127.0.0.1:8080
       '';
     };
   };
