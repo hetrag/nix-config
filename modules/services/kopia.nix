@@ -27,6 +27,7 @@
   sops.secrets."kopia/server_password" = { };
   sops.secrets."kopia/repo_password" = { };
   sops.templates."kopia-env".content = ''
-    KOPIA_PASSWORD=${config.sops.placeholder."kopia/repo_password"}
+    KOPIA_REPO_PASSWORD=${config.sops.placeholder."kopia/repo_password"}
+    KOPIA_SERVER_PASSWORD=${config.sops.placeholder."kopia/server_password"}
   '';
 }
