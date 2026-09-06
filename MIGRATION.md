@@ -1,3 +1,8 @@
+# varios notes
+nix-shell -p sops --run 'sops -e -i secrets.yaml
+
+
+
 # Server migration runbook
 
 From docker/portainer on the old server → NixOS (this flake). The plan:

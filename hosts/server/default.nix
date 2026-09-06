@@ -92,6 +92,7 @@
       5000        # lite llm
       # 3456      # vikunja
       # 51515     # kopia
+      5232      # radicale
       6333 
       6334 # qdrant
       7878      # radarr
