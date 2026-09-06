@@ -1,13 +1,3 @@
-# DRAFT (last migration step) — replaces the kopia stepping-stone container,
-# and with it the --insecure / --without-password /
-# --allow-extremely-dangerous-unauthenticated-server-on-the-network flags:
-# the native unit serves real TLS and proper authentication, and only the
-# tailnet can reach it (the firewall blocks 51515 from the LAN if you remove
-# it from hosts/server's allowedTCPPorts).
-#
-# Not imported yet. Before enabling: check `kopia server start --help` flags
-# against the packaged version, then delete kopia.yml + its stack entry from
-# modules/services/stepping-stone.
 { config, pkgs, ... }:
 
 {
@@ -37,7 +27,6 @@
   sops.secrets."kopia/server_password" = { };
   sops.secrets."kopia/repo_password" = { };
   sops.templates."kopia-env".content = ''
-    # opens the repository — same value the container uses today
     KOPIA_PASSWORD=${config.sops.placeholder."kopia/repo_password"}
   '';
 }

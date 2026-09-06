@@ -27,7 +27,7 @@
     # ../../modules/services/vikunja.nix
      ../../modules/services/authentik.nix
     # ../../modules/services/immich.nix
-    # ../../modules/services/kopia.nix
+    ../../modules/services/kopia.nix
     ../../modules/services/litellm.nix
   ];
 
@@ -91,7 +91,7 @@
       3000      # open-webui
       5000        # lite llm
       # 3456      # vikunja
-      # 51515     # kopia
+     51515     # kopia
       5232      # radicale
       6333 
       6334 # qdrant
