@@ -32,7 +32,7 @@
       '';
       # Goes live together with modules/services/authentik.nix
       "auth.jgelectronics.dk".extraConfig = ''
-        reverse_proxy 127.0.0.1:9000
+        reverse_proxy 127.0.0.1:9443
       '';
     #  "sabnzbd.jgelectronics.dk".extraConfig = ''
     #    reverse_proxy 127.0.0.1:8080
