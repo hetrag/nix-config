@@ -85,21 +85,23 @@
       4000      # mountd (nfsv3)
       4001      # statd (nfsv3)
       4002      # lockd (nfsv3)
-      8053      #adguard      
-      53        #adguard
-      # 22000     # syncthing transfer
-      # 2283      # immich
+      8053      # adguard      
+      53        # adguard
+      # 22000   # syncthing transfer
+      # 2283    # immich
       3000      # open-webui
-      5000        # lite llm
-      # 3456      # vikunja
+      5000      # lite llm
+      # 3456    # vikunja
       51515     # kopia
       5232      # radicale
       6333 
-      6334 # qdrant
+      6334      # qdrant
       7878      # radarr
       8080      # sabnzbd
-      # 8384      # syncthing gui
+      # 8384    # syncthing gui
       8989      # sonarr
+      9443      # authentik
+      9000      # authentik
     ];
     allowedUDPPorts = [
       # 21027     # syncthing local discovery
