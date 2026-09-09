@@ -28,6 +28,10 @@
         https = "127.0.0.1:9443";
         metrics = "127.0.0.1:9300";
       };
+      listen.trusted_proxy_cidrs = [
+        "127.0.0.1/32"
+        "::1/128"
+      ];
       # email = { # TODO when SMTP is wanted
       #   host = "smtp.example.com";
       #   port = 587;
