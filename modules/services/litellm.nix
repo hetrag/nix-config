@@ -15,7 +15,7 @@
 
       model_list = [
         {
-          model_name = "Minimax M3;
+          model_name = "Minimax M3";
           litellm_params = {
             model = "openai/accounts/fireworks/models/minimax-m3";
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/fireworks/v1";
