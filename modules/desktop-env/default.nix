@@ -28,6 +28,9 @@
     vlc
     kdePackages.kate
     google-chrome
+    stirling-pdf-desktop
+    libreoffice
+    vscode    
   ];
 }
 
