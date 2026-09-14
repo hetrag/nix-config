@@ -12,11 +12,19 @@
       general_settings = {
         master_key = "os.environ/LITELLM_MASTER_KEY";
       };
-deepseek-v4-flash-vision-exp
+
       model_list = [
         {
-          model_name = "DeepSeek V4.1 Flash";
+          model_name = "kimi-k2p6";
           litellm_params = {
+            model = "openai/accounts/fireworks/models/kimi-k2p6";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/fireworks/v1";
+            api_key = "os.environ/FIREWORKS_API_KEY";
+          };
+        }
+        {
+            model_name = "DeepSeek V4.1 Flash";
+            litellm_params = {
             model = "openai/accounts/fireworks/models/deepseek-v4p1-flash";
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/fireworks/v1";
             api_key = "os.environ/FIREWORKS_API_KEY";
@@ -39,7 +47,7 @@ deepseek-v4-flash-vision-exp
           };
         }
         {
-          model_name = "GLM 5.3 Coding";
+          model_name = "glm5-3-coding";
           litellm_params = {
             model = "openai/glm-5.3";
             api_base = "https://api.z.ai/api/coding/paas/v4";
