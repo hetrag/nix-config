@@ -54,7 +54,7 @@
             api_key = "os.environ/ZAI_API_KEY";
           };
         }
-                {
+        {
           model_name = "gpt-4o";
           litellm_params = {
             model = "gpt-4o";
