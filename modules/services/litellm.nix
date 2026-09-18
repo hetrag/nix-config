@@ -58,7 +58,7 @@
           model_name = "GPT-5.6 Sol";
           litellm_params = {
             model = "gpt-5.6-sol";
-            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/responses";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/completions";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
         }
@@ -66,7 +66,7 @@
           model_name = "GPT-5.6 Terra";
           litellm_params = {
             model = "gpt-5.6-terra";
-            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/responses";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/completions";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
         }
