@@ -39,9 +39,9 @@
           };
         }
         {
-          model_name = "GLM 5.3 Flash";
+          model_name = "Kimi K3";
           litellm_params = {
-            model = "openai/accounts/fireworks/models/glm-5p3-flash";
+            model = "openai/accounts/fireworks/models/kimi-k3;
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/fireworks/v1";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
@@ -52,6 +52,14 @@
             model = "openai/glm-5.3";
             api_base = "https://api.z.ai/api/coding/paas/v4";
             api_key = "os.environ/ZAI_API_KEY";
+          };
+        }
+                {
+          model_name = "gpt-4o";
+          litellm_params = {
+            model = "gpt-4o";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/";
+            api_key = "os.environ/FIREWORKS_API_KEY";
           };
         }
       ];
