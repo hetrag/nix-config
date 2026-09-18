@@ -81,7 +81,7 @@
         {
           model_name = "Claude Sonnet 5";
           litellm_params = {
-            model = "claude-sonnet-5;
+            model = "claude-sonnet-5";
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/anthropic/v1/messages";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
