@@ -41,7 +41,7 @@
         {
           model_name = "Kimi K3";
           litellm_params = {
-            model = "openai/accounts/fireworks/models/kimi-k3;
+            model = "openai/accounts/fireworks/models/kimi-k3";
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/fireworks/v1";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
