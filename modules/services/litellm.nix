@@ -55,10 +55,26 @@
           };
         }
         {
-          model_name = "gpt-4o";
+          model_name = "GPT-5.6 Sol";
           litellm_params = {
-            model = "gpt-4o";
+            model = "gpt-5.6-sol";
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/";
+            api_key = "os.environ/FIREWORKS_API_KEY";
+          };
+        }
+        {
+          model_name = "GPT-5.6 Terra";
+          litellm_params = {
+            model = "gpt-5.6-terra";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/";
+            api_key = "os.environ/FIREWORKS_API_KEY";
+          };
+        }
+        {
+          model_name = "claude-sonnet-4-5";
+          litellm_params = {
+            model = "claude-sonnet-4-5";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/anthropic/v1/";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
         }
