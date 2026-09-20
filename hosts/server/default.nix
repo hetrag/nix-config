@@ -19,7 +19,7 @@
     # ---- Native replacements, enabled one at a time as stacks migrate ----
     # (see MIGRATION.md; uncomment a line when that stack is cut over, in
     # roughly this order)
-    # ../../modules/services/postgres.nix
+    ../../modules/services/postgres.nix
     # ../../modules/services/syncthing.nix
     ../../modules/services/arr.nix
     ../../modules/services/qdrant.nix

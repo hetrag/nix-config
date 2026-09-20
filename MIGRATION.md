@@ -376,9 +376,11 @@ Create OAuth2 clients: `immich`, `open-webui`. Wire the secrets in
 `immich.nix` / `open-webui.nix` (commented TODOs show where).
 
 ### immich (the big one)
-Dump from the vectorchord container, enable `immich.nix` (brings its own
-postgres + vectorchord), restore, `chown -R immich:media /mnt/raid/media/immich`,
-verify ML + OIDC, delete stack. A detailed docker→NixOS walkthrough:
+Dump from the vectorchord container, enable `immich.nix` **and `postgres.nix`**
+(together — the latter's 02:00 `postgresqlBackup` dump is the only copy of the
+immich database restic ever sees), restore,
+`chown -R immich:immich /mnt/raid/media/immich`, verify ML + OIDC, delete
+stack. A detailed docker→NixOS walkthrough:
 https://diogotc.com/blog/immich-docker-to-nixos/
 
 Note: media files become immich-only (mode 0700 on the library) — access via

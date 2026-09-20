@@ -13,8 +13,8 @@ let
     "/var/lib/sonarr/Backups"
     "/var/lib/radarr/.config/radarr/Backups"
     "/mnt/raid/backups/postgresql"
-    # when immich lands, add "/mnt/raid/media/immich" — the job runs as
-    # root, so it can read the 0700 library
+    # 0700 immich:immich library — readable because the job runs as root
+    "/mnt/raid/media/immich"
   ];
 in {
   sops.secrets."restic/password" = { };
