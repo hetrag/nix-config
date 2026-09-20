@@ -26,7 +26,7 @@
     ../../modules/services/open-webui.nix
     # ../../modules/services/vikunja.nix
      ../../modules/services/authentik.nix
-    # ../../modules/services/immich.nix
+     ../../modules/services/immich.nix
     ../../modules/services/restic.nix
     ../../modules/services/litellm.nix
     ../../modules/services/radicale.nix
@@ -88,7 +88,7 @@
       8053      # adguard      
       53        # adguard
       # 22000   # syncthing transfer
-      # 2283    # immich
+      2283    # immich
       3000      # open-webui
       5000      # lite llm
       # 3456    # vikunja
