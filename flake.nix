@@ -54,13 +54,13 @@
         };
 
         # Desktop
-        desktop = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = sharedModules ++ [
-            ./modules/desktop-env   # Shared GUI
-            ./hosts/desktop
-          ];
-        };
+     #   desktop = nixpkgs.lib.nixosSystem {
+     #     system = "x86_64-linux";
+     #     modules = sharedModules ++ [
+     #       ./modules/desktop-env   # Shared GUI
+     #       ./hosts/desktop
+     #     ];
+     #   };
 
         # Server (headless, no GUI — also the NAS: /raid and /ssd are local disks)
         server = nixpkgs.lib.nixosSystem {

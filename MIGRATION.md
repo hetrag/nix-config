@@ -1,6 +1,7 @@
 # varios notes
 nix-shell -p sops --run 'sops -e -i secrets.yaml
 
+nix build .#nixosConfigurations.server.config.system.build.toplevel
 
 
 # Server migration runbook
