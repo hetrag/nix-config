@@ -58,7 +58,7 @@
           model_name = "gpt-5.6-sol";
           litellm_params = {
             model = "gpt-5.6-sol";
-            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1";
+            api_base = "https://yoda.teknologisk.dk/public/api-gateway/openai/v1/responses";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
         }
