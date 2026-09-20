@@ -1,9 +1,7 @@
-# Native immich. Media stays at the exact path the container uses today
-# (/mnt/raid/media/immich); the module brings its own postgres (with
-# vectorchord) and redis over unix sockets — no passwords. ML stays enabled
-# (default). Backup: postgresqlBackup (postgres.nix) dumps the DB at 02:00,
-# restic at 03:30 snapshots media + dumps (it runs as root, so the 0700
-# library is readable). Dump/restore + ownership steps: MIGRATION.md.
+# Native immich. Media at the old container path /mnt/raid/media/immich;
+# the module bundles postgres+vectorchord and redis over unix sockets (no DB
+# password). Backup: postgresqlBackup dumps at 02:00, restic snapshots media
+# and dumps at 03:30 as root. Migration (dump/restore/chown): MIGRATION.md.
 { config, lib, ... }:
 
 {
@@ -22,19 +20,20 @@
     };
   };
 
-  # The module only chmods/chowns an *existing* mediaLocation (tmpfiles "e");
-  # on a bare restore the directory would be missing and the server flaps.
+  # Module's tmpfiles rule is "e" (adjust-if-exists) — create the dir, or a
+  # bare restore crash-loops immich-server on its write probe.
   systemd.tmpfiles.rules = [
-    "d ${config.services.immich.mediaLocation} 0770 immich immich -"
+    "d ${config.services.immich.mediaLocation} 0770 immich media -"
   ];
 
-  # Direct read access for mig: library is group-readable immich:immich 0770
-  # (module default is 0700 / UMask 0077 — immich-process-only). New uploads
-  # stay group-readable via the UMask override. Restic needs no change (root).
-  users.users.mig.extraGroups = [ "immich" ];
+  # Library group-readable by "media" (mig on all hosts, arr, NFS gid 2000)
+  # instead of immich-only: group = "media" makes new uploads immich:media,
+  # UMask 0007 keeps them g+r; the module would re-force 0700 on boot, hence
+  # the mkForce. Concession: the arr stack can read the photos.
+  services.immich.group = "media";
   systemd.tmpfiles.settings.immich.${config.services.immich.mediaLocation}.e.mode =
     lib.mkForce "0770";
   systemd.services.immich-server.serviceConfig.UMask = lib.mkForce "0007";
 
-  sops.secrets."immich/oauth_client_secret" = { }; 
+  sops.secrets."immich/oauth_client_secret" = { };
 }
