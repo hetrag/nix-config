@@ -2,7 +2,7 @@
 # Vikunja's database is created here; authentik and immich enable their own
 # databases through their modules. services.postgresqlBackup replaces the
 # per-stack backup sidecars — one dump job for all databases, written to the
-# raid (kopia then picks the directory up for the offsite copy).
+# raid (restic then picks the directory up for the offsite copy).
 { ... }:
 
 {

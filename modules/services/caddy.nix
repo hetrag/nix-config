@@ -1,5 +1,5 @@
 # Public entrypoint: TLS termination for everything internet-facing,
-# replacing nginx-proxy-manager. Admin UIs (adguard, arr, syncthing, kopia)
+# replacing nginx-proxy-manager. Admin UIs (adguard, arr, syncthing)
 # are NOT proxied here — they stay reachable over the tailnet only
 # (tailscale0 is a trusted interface in modules/core).
 { ... }:

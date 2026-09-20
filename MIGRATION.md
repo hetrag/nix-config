@@ -24,7 +24,7 @@ needed), **portainer** (replaced by this repo), **nginx-proxy-manager**
 (replaced by caddy), **pi-hole** (replaced by adguard-home).
 
 End state: native immich, vikunja, open-webui (OIDC via authentik), syncthing,
-sonarr/radarr/sabnzbd, postgres, caddy, adguard-home, authentik, kopia.
+sonarr/radarr/sabnzbd, postgres, caddy, adguard-home, authentik, restic.
 Containers only for qdrant (no NixOS module).
 
 ## 0. Before touching the server — fill in the TODOs
@@ -49,7 +49,9 @@ From portainer's stack env / the host:
 - [ ] the **real** `DB_USERNAME`/`DB_PASSWORD` (the containerized databases
       keep the passwords their volumes were initialized with — the values in
       `docker_configs/.env` are stale)
-- [ ] the **real** kopia repository password
+- [ ] the **real** kopia repository password (the stepping-stone container
+      needs it, and it is the only way to read the old repo in an emergency —
+      restic cannot)
 - [ ] list of subdomains in nginx-proxy-manager
 - [ ] pi-hole: DNS records + blocklists (re-enter in adguard)
 
@@ -91,9 +93,8 @@ vikunja:
   service_secret: <openssl rand -base64 32>
 authentik:
   secret_key: <openssl rand -base64 60>
-kopia:
-  server_password: <openssl rand -base64 24>
-  repo_password: <same value as stepping-stone.kopia_repo_password>
+restic:
+  password: <openssl rand -base64 32>  # NEW repo password, not the kopia one
 ```
 
 No postgres password is needed anywhere: native services use unix-socket
@@ -364,14 +365,17 @@ verify ML + OIDC, delete stack. A detailed docker→NixOS walkthrough:
 https://diogotc.com/blog/immich-docker-to-nixos/
 
 Note: media files become immich-only (mode 0700 on the library) — access via
-the app; kopia (running as root) still backs the directory up.
+the app; restic (enabled last, below) still backs the directory up as root.
 
-### kopia (last)
-`kopia.nix` is a draft — verify its `kopia server start` flags against the
-packaged version, migrate the config dir as-is, enable, delete the container
-(and its dangerous flags with it).
+### restic (last)
+Replaces the kopia container outright — there is nothing to migrate: restic
+cannot read the kopia repo, so the new repo at `/mnt/ssd/restic` starts a
+fresh history. Add the `restic/password` secret, enable `restic.nix`, delete
+the stack (and its dangerous flags with it) and drop 51515 from the firewall.
+Keep the old kopia repo + password until the restic repo has enough history
+to restore from, then delete the old repo directory.
 
-## 4. End state checklist
+## 6. End state checklist
 
 - [ ] firewall: only 22, 53, 80, 443, 2049 (+ syncthing 22000/21027, adguard
       web) — everything else via caddy or tailnet
