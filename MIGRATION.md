@@ -4,6 +4,22 @@ nix-shell -p sops --run 'sops -e -i secrets.yaml
 nix build .#nixosConfigurations.server.config.system.build.toplevel
 
 
+1. Remote + secret work (10 sec):
+sudo nix shell nixpkgs#rclone -c \
+  env RCLONE_CONFIG=/run/secrets/restic/rclone_conf rclone about gdrive:
+
+2. The sync service itself:
+sudo systemctl start restic-gdrive-sync.service
+journalctl -u restic-gdrive-sync.service -f     # first run seeds the whole repo — can take days
+Verify from the Drive side: rclone lsf gdrive:restic (with the same RCLONE_CONFIG) should show the repo layout.
+
+3. The OnSuccess chain — run the backup early instead of waiting for 03:30, then watch the sync fire by itself:
+sudo systemctl start restic-backups-server.service
+journalctl -u restic-gdrive-sync.service -f
+
+If step 2 works but 3 doesn't trigger the sync, the hook is wrong; if 2 fails on auth, the rclone_conf secret is bad. Those two failure modes cover everything the setup can get wrong.
+
+
 # Server migration runbook
 
 From docker/portainer on the old server → NixOS (this flake). The plan:
