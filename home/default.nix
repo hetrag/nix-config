@@ -8,6 +8,12 @@
   programs.bash = {
     enable = true;
     initExtra = ''
+      # Prompt: NixOS green default, with "(.venv)" prefix when a virtualenv
+      # is active. direnv drops the PS1 change that `activate` makes (it only
+      # propagates exported vars), but VIRTUAL_ENV *is* exported — so read it
+      # here. Single-quoted PS1 => bash re-expands it at every prompt render.
+      PS1='\n''${VIRTUAL_ENV:+(''${VIRTUAL_ENV##*/}) }\[\033[1;32m\][\[\e]0;\u@\h: \w\a\]\u@\h:\w]\$\[\033[0m\] '
+
       # Auth token from sops (silently skipped until secrets are set up)
       if [ -r /run/secrets/anthropic_auth_token ]; then
         export ANTHROPIC_AUTH_TOKEN="$(cat /run/secrets/anthropic_auth_token)"
