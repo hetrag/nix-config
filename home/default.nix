@@ -15,6 +15,14 @@
     '';
   };
 
+  # direnv — auto-loads dev shells per directory (see python/.envrc).
+  # The bash hook ("eval $(direnv hook bash)") is added automatically
+  # because programs.bash is enabled above; no manual initExtra needed.
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true; # caches nix shells so `use nix` is instant after the first load
+  };
+
   # Claude Code — shared settings on every machine.
   # The auth token deliberately lives in sops, NOT in this file.
   home.file.".claude/settings.json".source = ./claude/settings.json;
