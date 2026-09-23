@@ -71,9 +71,9 @@
           };
         }
         {
-          model_name = "Claude Opus 5";
+          model_name = "Claude Opus 5.5";
           litellm_params = {
-            model = "claude-opus-5";
+            model = "claude-opus-5.5";
             api_base = "https://yoda.teknologisk.dk/public/api-gateway/anthropic/v1/messages";
             api_key = "os.environ/FIREWORKS_API_KEY";
           };
