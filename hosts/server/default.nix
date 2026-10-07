@@ -71,7 +71,7 @@
   fileSystems."/mnt/ssd" = lib.mkForce {
     device = "ssd";
     fsType = "zfs";
-    options = [""];
+#    options = [""];
   };
 
   services.nfs.server = {
