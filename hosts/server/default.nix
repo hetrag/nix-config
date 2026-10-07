@@ -65,7 +65,7 @@
   fileSystems."/mnt/raid" = lib.mkForce {
     device = "raid";
     fsType = "zfs";
-    options = [];
+    options = ["zfsutil"];
   };
 
   fileSystems."/mnt/ssd" = lib.mkForce {
