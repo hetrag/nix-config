@@ -48,7 +48,7 @@
 
   boot.supportedFilesystems.zfs = true;
   boot.zfs.forceImportRoot = false; # root is ext4; only data pools here
-  boot.zfs.extraPools = [ "ssd" "raid"];
+#  boot.zfs.extraPools = [ "ssd" "raid"];
 
   # REQUIRED by zfs: pools are stamped with the host's id at import and
   # refuse to import without it. Any unique 8 lowercase hex chars — on the
@@ -62,29 +62,29 @@
   services.zfs.autoScrub.enable = true;
 
   # Mount the pools locally instead of core's NFS client mounts.
-  fileSystems."/mnt/raid" = lib.mkForce {
-    device = "raid";
-    fsType = "zfs";
-    options = ["zfsutil"];
-  };
+ # fileSystems."/mnt/raid" = lib.mkForce {
+ #   device = "raid";
+ #   fsType = "zfs";
+ #   options = ["zfsutil"];
+ # };
 
-  fileSystems."/mnt/ssd" = lib.mkForce {
-    device = "ssd";
-    fsType = "zfs";
-    options = ["defaults"];
-  };
+ # fileSystems."/mnt/ssd" = lib.mkForce {
+ #   device = "ssd";
+ #   fsType = "zfs";
+ #   options = ["defaults"];
+ # };
 
-  services.nfs.server = {
-    enable = true;
-    extraNfsdConfig = '''';
-    mountdPort = 4000;
-    statdPort = 4001;
-    lockdPort = 4002;
-    exports = ''
-      /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-    '';
-  };
+ # services.nfs.server = {
+ #   enable = true;
+ #   extraNfsdConfig = '''';
+ #   mountdPort = 4000;
+ #   statdPort = 4001;
+ #   lockdPort = 4002;
+ #   exports = ''
+ #     /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+ #     /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+ #   '';
+ # };
 
   # Bare boot: ssh only. Uncomment a port together with the module that
   # listens on it (caddy/adguard open their own; the rest belong to the
