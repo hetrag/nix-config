@@ -24,7 +24,6 @@
     ../../modules/services/arr.nix
     ../../modules/services/qdrant.nix
     ../../modules/services/open-webui.nix
-    # ../../modules/services/vikunja.nix
      ../../modules/services/authentik.nix
      ../../modules/services/immich.nix
     ../../modules/services/restic.nix
@@ -62,6 +61,19 @@
   # imported pool). TRIM is already on by default once zfs is supported.
   services.zfs.autoScrub.enable = true;
 
+  # Mount the pools locally instead of core's NFS client mounts.
+  fileSystems."/mnt/raid" = lib.mkForce {
+    device = "raid";
+    fsType = "zfs";
+    options = [];
+  };
+
+  fileSystems."/mnt/ssd" = lib.mkForce {
+    device = "ssd";
+    fsType = "zfs";
+    options = [];
+  };
+
   services.nfs.server = {
     enable = true;
     extraNfsdConfig = '''';
@@ -91,7 +103,6 @@
       2283    # immich
       3000      # open-webui
       5000      # lite llm
-      # 3456    # vikunja
       5232      # radicale
       6333 
       6334      # qdrant

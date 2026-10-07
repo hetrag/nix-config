@@ -12,18 +12,12 @@
       email jens@gammeltoft.org
     '';
     virtualHosts = {
-      # TODO: match the subdomains currently configured in
-      # nginx-proxy-manager (vikunja's is known; check the others there
-      # before cutting over DNS)
       "immich.jgelectronics.dk".extraConfig = ''
         reverse_proxy 127.0.0.1:2283
       '';
-      "openwebui.jgelectronics.dk".extraConfig = ''
-        reverse_proxy 127.0.0.1:3000
-      '';
-      "vikunja.jgelectronics.dk".extraConfig = ''
-        reverse_proxy 127.0.0.1:3456
-      '';
+      #"openwebui.jgelectronics.dk".extraConfig = ''
+      #  reverse_proxy 127.0.0.1:3000
+      #'';
      # "litellm.jgelectronics.dk".extraConfig = ''
      #   reverse_proxy 127.0.0.1:5000
      # '';
