@@ -72,10 +72,9 @@
     lockdPort = 4002;
     exports = ''
       /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
-      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
     '';
   };
-
+#      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
   # Bare boot: ssh only. Uncomment a port together with the module that
   # listens on it (caddy/adguard open their own; the rest belong to the
   # docker stacks, which publish past the nixos firewall anyway).
