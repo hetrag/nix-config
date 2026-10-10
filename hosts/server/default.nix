@@ -58,11 +58,22 @@
   services.zfs.trim.enable = true;
 
   # Mount the pools locally instead of core's NFS client mounts.
-#  fileSystems."/mnt/raid" = {
-#    device = "raid";
-#    fsType = "zfs";
-#    options = ["zfsutil"];
-#  };
+  fileSystems."/mnt/raid" = {
+    device = lib.mkForce "raid";
+    fsType = lib.mkForce "zfs";
+    options = lib.mkForce ["zfsutil"];
+  };
+
+  fileSystems."/mnt/ssd" = {
+    device = lib.mkForce "/dev/disk/by-uuid/ca77dcf2-6462-4832-a8c7-97625ad243f3";
+    fsType = lib.mkForce "ext4";
+    options = lib.mkForce ["defaults"];
+  };
+
+  systemd.services.nfs-server.unitConfig.RequiresMountsFor = [
+    "/mnt/raid"
+    "/mnt/ssd"
+  ];
 
   services.nfs.server = {
     enable = true;
@@ -72,6 +83,7 @@
     lockdPort = 4002;
     exports = ''
       /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
     '';
   };
 #      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
