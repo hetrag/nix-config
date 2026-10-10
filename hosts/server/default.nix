@@ -43,48 +43,38 @@
   # core's linuxPackages_latest.
   boot.kernelPackages = lib.mkForce pkgs.linuxPackages;
 
-  # ZFS for the two NAS pools. This pulls in the zfs kernel module +
+  # ZFS for the NAS pool. This pulls in the zfs kernel module +
   # userspace and enables the zfs-import@pool / zfs-mount units at boot.
 
   boot.supportedFilesystems.zfs = true;
   boot.zfs.forceImportRoot = false; # root is ext4; only data pools here
-#  boot.zfs.extraPools = [ "ssd" "raid"];
+  boot.zfs.extraPools = ["raid"];
 
-  # REQUIRED by zfs: pools are stamped with the host's id at import and
-  # refuse to import without it. Any unique 8 lowercase hex chars — on the
-  # running server: head -c 8 /etc/machine-id
-  # Set it once and NEVER change it.
+# 2. Required: 8-digit hex host ID (prevent host collision on import)
+  # Generate one with: head -c 8 /etc/machine-id
   networking.hostId = "1767aa3a";
 
-
-  # Pool maintenance: scrub checks pool integrity (monthly by default, every
-  # imported pool). TRIM is already on by default once zfs is supported.
   services.zfs.autoScrub.enable = true;
+  services.zfs.trim.enable = true;
 
   # Mount the pools locally instead of core's NFS client mounts.
- # fileSystems."/mnt/raid" = lib.mkForce {
- #   device = "raid";
- #   fsType = "zfs";
- #   options = ["zfsutil"];
- # };
+#  fileSystems."/mnt/raid" = {
+#    device = "raid";
+#    fsType = "zfs";
+#    options = ["zfsutil"];
+#  };
 
- # fileSystems."/mnt/ssd" = lib.mkForce {
- #   device = "ssd";
- #   fsType = "zfs";
- #   options = ["defaults"];
- # };
-
- # services.nfs.server = {
- #   enable = true;
- #   extraNfsdConfig = '''';
- #   mountdPort = 4000;
- #   statdPort = 4001;
- #   lockdPort = 4002;
- #   exports = ''
- #     /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
- #     /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
- #   '';
- # };
+  services.nfs.server = {
+    enable = true;
+    extraNfsdConfig = '''';
+    mountdPort = 4000;
+    statdPort = 4001;
+    lockdPort = 4002;
+    exports = ''
+      /mnt/raid *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+      /mnt/ssd  *(rw,insecure,all_squash,anonuid=1000,anongid=2000)
+    '';
+  };
 
   # Bare boot: ssh only. Uncomment a port together with the module that
   # listens on it (caddy/adguard open their own; the rest belong to the
