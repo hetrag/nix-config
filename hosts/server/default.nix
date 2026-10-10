@@ -24,7 +24,7 @@
     ../../modules/services/arr.nix
    # ../../modules/services/qdrant.nix
    # ../../modules/services/open-webui.nix
-   #  ../../modules/services/authentik.nix
+     ../../modules/services/authentik.nix
      ../../modules/services/immich.nix
    # ../../modules/services/restic.nix
    # ../../modules/services/litellm.nix
