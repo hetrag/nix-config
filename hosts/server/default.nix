@@ -14,7 +14,6 @@
     # ---- Foundation, enabled from day one ----
     ../../modules/services/caddy.nix
     ../../modules/services/adguard.nix
-    #../../modules/services/stepping-stone
 
     # ---- Native replacements, enabled one at a time as stacks migrate ----
     # (see MIGRATION.md; uncomment a line when that stack is cut over, in
@@ -22,13 +21,13 @@
     ../../modules/services/postgres.nix
     # ../../modules/services/syncthing.nix
     ../../modules/services/arr.nix
-   # ../../modules/services/qdrant.nix
-   # ../../modules/services/open-webui.nix
+    ../../modules/services/qdrant.nix
+    #../../modules/services/open-webui.nix
      ../../modules/services/authentik.nix
      ../../modules/services/immich.nix
-   # ../../modules/services/restic.nix
-   # ../../modules/services/litellm.nix
-   # ../../modules/services/radicale.nix
+    ../../modules/services/restic.nix
+    ../../modules/services/litellm.nix
+    ../../modules/services/radicale.nix
   ];
 
   # Bootloader (UEFI / systemd-boot default)
