@@ -28,6 +28,9 @@
       "auth.jgelectronics.dk".extraConfig = ''
         reverse_proxy 127.0.0.1:9000
       '';
+      "files.jgelectronics.dk".extraConfig = ''
+        reverse_proxy 127.0.0.1:8082
+      '';
     #  "sabnzbd.jgelectronics.dk".extraConfig = ''
     #    reverse_proxy 127.0.0.1:8080
     #  '';
