@@ -43,7 +43,7 @@ in
       data_provider = {
         driver = "sqlite";
         name = "${config.services.sftpgo.dataDir}/sftpgo.db";
-        create_default_admin = false;
+        create_default_admin = true;
         pre_login_hook = "${provisionUser}";
       };
       httpd.bindings = [
@@ -84,7 +84,18 @@ in
     requires = [ "mnt-raid.mount" ];
     after = [ "mnt-raid.mount" ];
     unitConfig.RequiresMountsFor = [ sharedFolder ];
-    serviceConfig.UMask = lib.mkForce "0007";
+    environment.SFTPGO_DEFAULT_ADMIN_USERNAME = "bootstrap-admin";
+    preStart = ''
+      umask 0077
+      printf 'SFTPGO_DEFAULT_ADMIN_PASSWORD=%s\n' \
+        "$(${pkgs.openssl}/bin/openssl rand -hex 32)" > /run/sftpgo/bootstrap.env
+    '';
+    serviceConfig = {
+      UMask = lib.mkForce "0007";
+      RuntimeDirectory = "sftpgo";
+      RuntimeDirectoryMode = "0700";
+      EnvironmentFile = "-/run/sftpgo/bootstrap.env";
+    };
   };
 
   sops.secrets."sftpgo/oauth_client_secret".owner = config.services.sftpgo.user;
