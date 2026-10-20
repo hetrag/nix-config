@@ -6,6 +6,11 @@
 
 let
   shareDir = "/mnt/raid/share";
+  dufsStrataTheme = pkgs.fetchzip {
+    url = "https://github.com/mcking-07/dufs-strata/releases/download/v1.0.0/dufs-strata.zip";
+    stripRoot = false;
+    hash = "sha256-SQcalG+m5D20E2IPMubq6jxttyX2Hrn/rckedKURlrA=";
+  };
 in
 {
   # Ensure the share directory exists with setgid so files created via
@@ -21,7 +26,7 @@ in
     unitConfig.RequiresMountsFor = [ shareDir ];
 
     serviceConfig = {
-      ExecStart = "${pkgs.dufs}/bin/dufs --bind 127.0.0.1 --port 8082 --allow-all ${shareDir}";
+      ExecStart = "${pkgs.dufs}/bin/dufs --bind 127.0.0.1 --port 8082 --allow-all --hidden '.*' --assets ${dufsStrataTheme} ${shareDir}";
       Restart = "on-failure";
 
       # Run as an unprivileged dynamic user in the shared "media" group
