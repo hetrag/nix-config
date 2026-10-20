@@ -6,10 +6,20 @@
 
 let
   shareDir = "/mnt/raid/share";
-  dufsStrataTheme = pkgs.fetchzip {
+  dufsStrataSrc = pkgs.fetchzip {
     url = "https://github.com/mcking-07/dufs-strata/releases/download/v1.0.0/dufs-strata.zip";
     hash = "sha256-D25lQeFKHXsEfFJE/32ZoFSuqTdHNdKM3Vww+IVLRmQ=";
   };
+  # dufs-strata gates upload/delete buttons on `!!p.user` (expecting dufs's
+  # built-in `-a` basic auth). Since Authentik handles auth in front of dufs,
+  # enable upload/delete based on dufs's allow_* flags and hide the Sign In button.
+  dufsStrataTheme = pkgs.runCommand "dufs-strata-theme" { } ''
+    cp -r ${dufsStrataSrc} $out
+    chmod -R u+w $out
+    substituteInPlace $out/index.html \
+      --replace-fail 'let re=!!p.user,ie=re&&p.allow_upload,ae=re&&p.allow_delete' 'let re=true,ie=p.allow_upload,ae=p.allow_delete' \
+      --replace-fail '(0,H.jsxs)(`button`,{onClick:s,className:N(P.outline,P.icon,`sm:w-auto sm:px-3`),"aria-label":`sign in`,children:[(0,H.jsx)(wr,{className:`w-3.5 h-3.5`}),(0,H.jsx)(`span`,{className:`max-sm:hidden`,children:`sign in`})]})' 'null'
+  '';
 in
 {
   # Ensure the share directory exists with setgid so files created via
