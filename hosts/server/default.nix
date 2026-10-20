@@ -28,7 +28,7 @@
     ../../modules/services/restic.nix
     ../../modules/services/litellm.nix
     ../../modules/services/radicale.nix
-    ../../modules/services/sftpgo.nix
+    ../../modules/services/dufs.nix
   ];
 
   # Bootloader (UEFI / systemd-boot default)

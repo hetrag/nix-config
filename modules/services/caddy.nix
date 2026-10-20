@@ -29,7 +29,19 @@
         reverse_proxy 127.0.0.1:9000
       '';
       "files.jgelectronics.dk".extraConfig = ''
-        reverse_proxy 127.0.0.1:8082
+        route {
+          # Forward outpost callbacks/login flow to Authentik's embedded outpost
+          reverse_proxy /outpost.goauthentik.io/* 127.0.0.1:9000
+
+          # Authenticate every request against Authentik before reaching dufs
+          forward_auth 127.0.0.1:9000 {
+            uri /outpost.goauthentik.io/auth/caddy
+            copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+            trusted_proxies private_ranges
+          }
+
+          reverse_proxy 127.0.0.1:8082
+        }
       '';
     #  "sabnzbd.jgelectronics.dk".extraConfig = ''
     #    reverse_proxy 127.0.0.1:8080
