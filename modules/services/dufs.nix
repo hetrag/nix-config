@@ -8,8 +8,7 @@ let
   shareDir = "/mnt/raid/share";
   dufsStrataTheme = pkgs.fetchzip {
     url = "https://github.com/mcking-07/dufs-strata/releases/download/v1.0.0/dufs-strata.zip";
-    stripRoot = false;
-    hash = "sha256-SQcalG+m5D20E2IPMubq6jxttyX2Hrn/rckedKURlrA=";
+    hash = "sha256-D25lQeFKHXsEfFJE/32ZoFSuqTdHNdKM3Vww+IVLRmQ=";
   };
 in
 {
